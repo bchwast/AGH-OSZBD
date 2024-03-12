@@ -1,7 +1,7 @@
 
 # SQL - Funkcje okna (Window functions) 
 
-# Lab 1-2
+# Lab 1-2-3
 
 ---
 **Imię i nazwisko:** Bartłomiej Chwast, Jakub Domogała
@@ -164,7 +164,7 @@ select p.productId, p.productName, p.unitPrice,
        (select avg(unitprice) from products) as avgPrice
 from products p;
 
--- join (?)
+-- join
 with av as (
     select p.productId,
         (select avg(unitprice) from products) as avgPrice
