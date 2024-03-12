@@ -4,7 +4,7 @@
 # Lab 1-2
 
 ---
-**Imię i nazwisko:**
+**Imię i nazwisko:** Bartłomiej Chwast, Jakub Domogała
 
 --- 
 
@@ -41,11 +41,11 @@ Oprogramowanie dostępne jest na przygotowanej maszynie wirtualnej
 
 ## Dokumentacja/Literatura
 
-- Kathi Kellenberger,  Clayton Groom, Ed Pollack, Expert T-SQL Window Functions in SQL Server 2019, Apres 2019
+- Kathi Kellenberger,	 Clayton Groom, Ed Pollack, Expert T-SQL Window Functions in SQL Server 2019, Apres 2019
 - Itzik Ben-Gan, T-SQL Window Functions: For Data Analysis and Beyond, Microsoft 2020
 
 - Kilka linków do materiałów które mogą być pomocne
-	 - https://learn.microsoft.com/en-us/sql/t-sql/queries/select-over-clause-transact-sql?view=sql-server-ver16
+		- https://learn.microsoft.com/en-us/sql/t-sql/queries/select-over-clause-transact-sql?view=sql-server-ver16
 	- https://www.sqlservertutorial.net/sql-server-window-functions/
 	- https://www.sqlshack.com/use-window-functions-sql-server/
 	- https://www.postgresql.org/docs/current/tutorial-window.html
@@ -79,7 +79,13 @@ from products p;
 Jaka jest są podobieństwa, jakie różnice pomiędzy grupowaniem danych a działaniem funkcji okna?
 
 ```
--- wyniki ...
+W wyniku pierwszego zapytania otrzymaliśmy jedną wartość - średnią cenę wszystkich produktów.
+W wyniku drugiego zapytania otrzymaliśmy tyle samo wartości ile w tabeli, ale wszystkie są równe średniej cenie wszystkich produktów.
+W wyniku trzeciego zapytania otrzymaliśmy średnią cenę produktów w każdej kategorii.
+W wyniku czwartego zapytania otrzymaliśmy tyle samo wartości ile w tabeli, ale wszystkie są równe średniej cenie produktów w danej kategorii.
+
+Zarówno funkcja okna jak i grupowanie danych pozwala na uzyskanie wyników dla grupy wierszy.
+W przypadku grupowania wynik jest obliczany dla każdej grupy, a w przypadku funkcji okna wynik jest obliczany dla każdego wiersza w grupie.
 ```
 
 ---
@@ -91,13 +97,13 @@ Wykonaj i porównaj wyniki następujących poleceń.
 --1)
 
 select p.productid, p.ProductName, p.unitprice,
-       (select avg(unitprice) from products) as avgprice
+	(select avg(unitprice) from products) as avgprice
 from products p
 where productid < 10
 
 --2)
 select p.productid, p.ProductName, p.unitprice,
-       avg(unitprice) over () as avgprice
+	 avg(unitprice) over () as avgprice
 from products p
 where productid < 10
 ```
@@ -106,6 +112,29 @@ where productid < 10
 Jaka jest różnica? Czego dotyczy warunek w każdym z przypadków? Napisz polecenie równoważne 
 - 1) z wykorzystaniem funkcji okna. Napisz polecenie równoważne 
 - 2) z wykorzystaniem podzapytania
+
+```
+W wyniku pierwszego zapytania otrzymaliśmy średnią cenę wszystkich produktów dla każdego produktu, który ma id mniejsze niż 10.
+W wyniku drugiego zapytania otrzymaliśmy średnią cenę produktów, które mają id mniejze niż 10, dla każdego produktu, który ma id mniejsze niż 10.
+
+W pierwszym zapytaniu warunek nie dotyczył podzapytania, a w drugim zapytaniu warunek dotyczył funkcji okna.
+```
+```sql
+-- Polecenie równoważne 1) z wykorzystaniem funkcji okna:
+with av as (
+    select p.productid, p.ProductName, p.unitprice,
+       avg(unitprice) over () as avgprice
+    from products p
+)
+select * from av
+where productid < 10
+
+-- Polecenie równoważne 2) z wykorzystaniem podzapytania:
+select p.productid, p.ProductName, p.unitprice,
+	(select avg(unitprice) from products where productid < 10) as avgprice
+from products p
+where productid < 10
+```
 
 # Zadanie 3
 
@@ -130,8 +159,30 @@ W DataGrip użyj opcji Explain Plan/Explain Analyze
 
 
 ```sql
--- wyniki ...
+-- podzapytanie
+select p.productId, p.productName, p.unitPrice,
+       (select avg(unitprice) from products) as avgPrice
+from products p;
+
+-- join (?)
+with av as (
+    select p.productId,
+        (select avg(unitprice) from products) as avgPrice
+    from products p
+)
+select p.productId, p.productName, p.unitPrice,
+         av.avgPrice
+from products p
+inner join av on p.productId = av.productId;
+
+-- funkcja okna
+select p.productId, p.productName, p.unitPrice,
+       avg(unitprice) over () as avgPrice
+from products p;
 ```
+
+MSSQL
+![w:700](_img/3_sub_mssql.png)
 
 ---
 
@@ -146,7 +197,31 @@ Napisz polecenie z wykorzystaniem podzapytania, join'a oraz funkcji okna. Porów
 Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 
 ```sql
--- wyniki ...
+-- podzapytanie
+select p.productId, p.productName, p.unitPrice,
+       (select avg(unitprice) from products where CategoryID = p.CategoryID) as avgPrice
+from products p
+where p.unitPrice > (select avg(unitprice) from products where CategoryID = p.CategoryID);
+
+-- join
+with av as (
+    select p.categoryId, avg(unitprice) avgPrice
+    from products p
+    group by p.categoryId
+)
+select p.productId, p.productName, p.unitPrice, av.avgPrice
+from products p
+inner join av on p.CategoryID = av.CategoryID
+where p.unitPrice > av.avgPrice;
+
+-- funkcja okna
+with av as (
+    select p.productId, p.productName, p.unitPrice,
+           avg(unitprice) over (partition by CategoryID) as avgPrice
+    from products p
+)
+select * from av
+where unitPrice > avgPrice;
 ```
 
 
@@ -165,18 +240,18 @@ Skrypt dla SQL Srerver
 
 ```sql
 create table product_history(
-   id int identity(1,1) not null,
-   productid int,
-   productname varchar(40) not null,
-   supplierid int null,
-   categoryid int null,
-   quantityperunit varchar(20) null,
-   unitprice decimal(10,2) null,
-   quantity int,
-   value decimal(10,2),
-   date date,
- constraint pk_product_history primary key clustered
-    (id asc )
+		 id int identity(1,1) not null,
+		 productid int,
+		 productname varchar(40) not null,
+		 supplierid int null,
+		 categoryid int null,
+		 quantityperunit varchar(20) null,
+		 unitprice decimal(10,2) null,
+		 quantity int,
+		 value decimal(10,2),
+		 date date,
+	constraint pk_product_history primary key clustered
+			 (id asc )
 )
 ```
 
@@ -210,18 +285,18 @@ Skrypt dla Postgresql
 
 ```sql
 create table product_history(
-   id int generated always as identity not null  
-       constraint pkproduct_history
-            primary key,
-   productid int,
-   productname varchar(40) not null,
-   supplierid int null,
-   categoryid int null,
-   quantityperunit varchar(20) null,
-   unitprice decimal(10,2) null,
-   quantity int,
-   value decimal(10,2),
-   date date
+		 id int generated always as identity not null  
+						 constraint pkproduct_history
+											 primary key,
+		 productid int,
+		 productname varchar(40) not null,
+		 supplierid int null,
+		 categoryid int null,
+		 quantityperunit varchar(20) null,
+		 unitprice decimal(10,2) null,
+		 quantity int,
+		 value decimal(10,2),
+		 date date
 );
 ```
 
@@ -253,9 +328,12 @@ where 1=1;
 
 Wykonaj polecenia: `select count(*) from product_history`,  potwierdzające wykonanie zadania
 
-```sql
---- wyniki ...
-```
+MSSQL\
+![w:700](_img/5_mssql.png)\
+Postgresql\
+![w:700](_img/5_postgres.png)\
+SQLite\
+![w:700](_img/5_sqlite.png)
 
 ---
 # Zadanie 6
@@ -272,7 +350,31 @@ Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 
 
 ```sql
---- wyniki ...
+-- podzapytanie
+select p.id, p.productId, p.productName, p.unitPrice,
+       (select avg(unitprice) from product_history where CategoryID = p.CategoryID) as avgPrice
+from product_history p
+where p.unitPrice > (select avg(unitprice) from products where CategoryID = p.CategoryID);
+
+-- join
+with av as (
+    select p.categoryId, avg(unitprice) avgPrice
+    from product_history p
+    group by p.categoryId
+)
+select p.id, p.productId, p.productName, p.unitPrice, av.avgPrice
+from product_history p
+inner join av on p.CategoryID = av.CategoryID
+where p.unitPrice > av.avgPrice;
+
+-- funkcja okna
+with av as (
+    select p.id, p.productId, p.productName, p.unitPrice,
+           avg(unitprice) over (partition by CategoryID) as avgPrice
+    from product_history p
+)
+select * from av
+where unitPrice > avgPrice;
 ```
 
 
