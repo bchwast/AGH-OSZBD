@@ -181,8 +181,29 @@ select p.productId, p.productName, p.unitPrice,
 from products p;
 ```
 
-MSSQL
-![w:700](_img/3_sub_mssql.png)
+### MSSQL
+Podzapytanie\
+![w:700](_img/3mssql1.jpg)
+Join\
+![w:700](_img/3mssql2.jpg)
+Funkcja okna\
+![w:700](_img/3mssql3.jpg)
+### SQLite
+Podzapytanie\
+![w:700](_img/3sqllite1.jpg)
+Join\
+![w:700](_img/3sqllite2.jpg)
+Funkcja okna\
+![w:700](_img/3sqllite3.jpg)
+---
+### PostgreSQL
+Podzapytanie\
+![w:700](_img/3postgre1.jpg)
+Join\
+![w:700](_img/3postgre2.jpg)
+Funkcja okna\
+![w:700](_img/3postgre3.jpg)
+---
 
 ---
 
