@@ -420,7 +420,35 @@ Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 
 
 ```sql
---- wyniki ...
+-- podzapytanie
+select p.id, p.productId, p.productName, p.unitPrice,
+    (select avg(unitprice) from product_history where categoryId = p.categoryId) as avgCatPrice,
+    (select sum(value) from product_history where categoryid = p.categoryId) as totalValue,
+    (select avg(unitprice) from product_history where productId = p.productId and year(date) = year(p.date)) as avgYearPrice
+from product_history p;
+
+-- join
+with av1 as (select p.categoryId, avg(unitprice) avgCatPrice, sum(value) totalValue
+             from product_history p
+             group by p.categoryId
+)
+with av2 as (
+    select p.productId, year(p.date) year, avg(unitprice) avgYearPrice
+    from product_history p
+    group by p.productId, year(p.date)
+)
+select p.id, p.productId, p.productName, p.unitPrice, av1.avgCatPrice, av1.totalValue, av2.avgYearPrice
+from product_history p
+inner join av1 on p.CategoryID = av1.CategoryID
+inner join av2 on p.productId = av2.productId and year(p.date) = av2.year;
+
+-- funkcja okna
+select p.id, p.productId, p.productName, p.unitPrice,
+    avg(unitprice) over w as avgCatPrice,
+    sum(value) over w as totalValue,
+    avg(unitprice) over (partition by p.productId, year(p.date)) as avgYearPrice
+from product_history p
+window w as (partition by p.categoryId);
 ```
 
 ---
@@ -448,7 +476,17 @@ Zadanie
 Spróbuj uzyskać ten sam wynik bez użycia funkcji okna
 
 ```sql
---- wyniki ...
+select p.productid, p.productname, p.unitprice, p.categoryid,
+    (select count(*) from products
+        where p.categoryId = CategoryID
+        and (p.UnitPrice < UnitPrice or (p.UnitPrice = UnitPrice and p.ProductID > ProductID))) + 1 as rowno,
+    (select count(*) from products
+        where p.categoryId = CategoryID
+        and p.UnitPrice < UnitPrice) + 1 as rankprice,
+    (select count(distinct UnitPrice) from products
+        where p.categoryId = CategoryID and p.UnitPrice < UnitPrice) + 1 as denserankprice
+from products p
+order by p.CategoryID, p.UnitPrice desc, p.ProductID;
 ```
 
 
@@ -468,7 +506,14 @@ Dla każdego produktu, podaj 4 najwyższe ceny tego produktu w danym roku. Zbió
 Uporządkuj wynik wg roku, nr produktu, pozycji w rankingu
 
 ```sql
---- wyniki ...
+with r as (
+    select year(date) as year, productid, productname, unitprice, date,
+        rank() over (partition by productid, year(date) order by unitprice desc) as rankprice
+    from product_history
+)
+select * from r
+where rankprice <= 4
+order by year, productid, rankprice;
 ```
 
 
@@ -476,7 +521,17 @@ Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czas
 
 
 ```sql
---- wyniki ...
+with r as (
+    select year(p.date) as year, p.productid, p.productname, p.unitprice, p.date,
+        (select count(*) from product_history
+            where year(date) = year(p.date)
+                and productid = p.productid
+                and (unitprice > p.unitprice)) + 1 as rankprice
+from product_history p
+)
+select * from r
+where rankprice <= 4
+order by year, productid, rankprice;
 ```
 
 ---
@@ -509,7 +564,14 @@ order by date;
 ```
 
 ```sql
--- wyniki ...
+select p.productid, p.productname, p.categoryid, p.date, p.unitprice,
+   (select unitprice from product_history
+        where productid = p.productid and date = dateadd(day, -1, p.date)) as previousprodprice,
+   (select unitprice from product_history
+        where productid = p.productid and date = dateadd(day, 1, p.date)) as nextprodprice
+from product_history p
+where productid = 1 and year(date) = 2022
+order by date;
 ```
 
 
@@ -537,7 +599,14 @@ Zbiór wynikowy powinien zawierać:
 - wartość poprzedniego zamówienia danego klienta.
 
 ```sql
--- wyniki ...
+select c.CompanyName, o.OrderID, o.OrderDate, sum(od.Quantity * od.UnitPrice * (1 - od.Discount)) + o.Freight as OrderValue,
+    lag(o.OrderID) over (partition by c.CompanyName order by o.OrderDate) as PreviousOrderID,
+    lag(o.OrderDate) over (partition by c.CompanyName order by o.OrderDate) as PreviousOrderDate,
+    lag(sum(od.Quantity * od.UnitPrice * (1 - od.Discount)) + o.Freight) over (partition by c.CompanyName order by o.OrderDate) as PreviousOrderValue
+from orders o
+inner join [Order Details] od on o.OrderID = od.OrderID
+inner join Customers c on o.CustomerID = c.CustomerID
+group by c.CompanyName, o.OrderID, o.OrderDate, o.Freight
 ```
 
 
@@ -559,7 +628,13 @@ order by categoryid, unitprice desc;
 ```
 
 ```sql
--- wyniki ...
+select productid, productname, unitprice, categoryid,
+    first_value(productname) over (partition by categoryid
+order by unitprice desc) first,
+    last_value(productname) over (partition by categoryid
+order by unitprice desc RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING ) last
+from products
+order by categoryid, unitprice desc;
 ```
 
 Zadanie
@@ -567,7 +642,11 @@ Zadanie
 Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czasy i plany zapytań. Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 
 ```sql
--- wyniki ...
+select p.productid, p.productname, p.unitprice, p.categoryid,
+    (select top 1 productname from Products where p.CategoryID = CategoryID order by UnitPrice desc) as first,
+    (select top 1 productname from Products where p.CategoryID = CategoryID order by UnitPrice) as last
+from products p
+order by p.categoryid, p.unitprice desc;
 ```
 
 ---
@@ -592,7 +671,17 @@ Zbiór wynikowy powinien zawierać:
 	- wartość tego zamówienia
 
 ```sql
---- wyniki ...
+with r as (
+    select c.CustomerID, o.OrderID, o.OrderDate, sum(od.Quantity * od.UnitPrice * (1 - od.Discount)) + o.Freight as OrderValue
+    from orders o
+    inner join [Order Details] od on o.OrderID = od.OrderID
+    inner join Customers c on o.CustomerID = c.CustomerID
+    group by c.CustomerID, o.OrderID, o.OrderDate, o.Freight
+)
+select *,
+    first_value(concat(r.OrderID, ' ', r.OrderDate, ' ', r.OrderValue)) over (partition by r.CustomerID, month(r.OrderDate) order by r.OrderValue) as MinOrder,
+    last_value(concat(r.OrderID, ' ', r.OrderDate, ' ', r.OrderValue)) over (partition by r.CustomerID, month(r.OrderDate) order by r.OrderValue range between unbounded preceding and unbounded following ) as MaxOrder
+from r
 ```
 
 ---
@@ -610,13 +699,23 @@ Zbiór wynikowy powinien zawierać:
 - wartość sprzedaży produktu narastające od początku miesiąca
 
 ```sql
--- wyniki ...
+select ph.id, ph.productid, ph.date, ph.value,
+    sum(ph.value) over (partition by ph.productid, year(ph.date), month(ph.date) order by ph.date) as running_total
+from product_history ph
+order by ph.productid, ph.date;
 ```
 
 Spróbuj wykonać zadanie bez użycia funkcji okna. Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czasy i plany zapytań. Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 
 ```sql
--- wyniki ...
+select ph.id, ph.productid, ph.date, ph.value,
+    (select sum(ph2.value) from product_history ph2
+        where ph2.productid = ph.productid
+            and year(ph2.date) = year(ph.date)
+            and month(ph2.date) = month(ph.date)) as running_total
+from product_history ph
+order by ph.productid, ph.date;
+
 ```
 
 ---
