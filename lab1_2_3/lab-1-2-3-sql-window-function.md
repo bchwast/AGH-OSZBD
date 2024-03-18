@@ -1,13 +1,12 @@
-
-# SQL - Funkcje okna (Window functions) 
+# SQL - Funkcje okna (Window functions)
 
 # Lab 1-2-3
 
 ---
+
 **Imię i nazwisko:** Bartłomiej Chwast, Jakub Domogała
 
---- 
-
+---
 
 Celem ćwiczenia jest zapoznanie się z działaniem funkcji okna (window functions) w SQL, analiza wydajności zapytań i porównanie z rozwiązaniami przy wykorzystaniu "tradycyjnych" konstrukcji SQL
 
@@ -28,35 +27,37 @@ Zwróć uwagę na formatowanie kodu
 ## Oprogramowanie - co jest potrzebne?
 
 Do wykonania ćwiczenia potrzebne jest następujące oprogramowanie:
+
 - MS SQL Server - wersja 2019, 2022
 - PostgreSQL - wersja 15/16
 - SQLite
 - Narzędzia do komunikacji z bazą danych
-	- SSMS - Microsoft SQL Managment Studio
-	- DtataGrip lub DBeaver
--  Przykładowa baza Northwind
-	- W wersji dla każdego z wymienionych serwerów
+  - SSMS - Microsoft SQL Managment Studio
+  - DtataGrip lub DBeaver
+- Przykładowa baza Northwind
+  - W wersji dla każdego z wymienionych serwerów
 
 Oprogramowanie dostępne jest na przygotowanej maszynie wirtualnej
 
 ## Dokumentacja/Literatura
 
-- Kathi Kellenberger,	 Clayton Groom, Ed Pollack, Expert T-SQL Window Functions in SQL Server 2019, Apres 2019
+- Kathi Kellenberger, Clayton Groom, Ed Pollack, Expert T-SQL Window Functions in SQL Server 2019, Apres 2019
 - Itzik Ben-Gan, T-SQL Window Functions: For Data Analysis and Beyond, Microsoft 2020
 
-- Kilka linków do materiałów które mogą być pomocne
-		- https://learn.microsoft.com/en-us/sql/t-sql/queries/select-over-clause-transact-sql?view=sql-server-ver16
-	- https://www.sqlservertutorial.net/sql-server-window-functions/
-	- https://www.sqlshack.com/use-window-functions-sql-server/
-	- https://www.postgresql.org/docs/current/tutorial-window.html
-	- https://www.postgresqltutorial.com/postgresql-window-function/
-	-  https://www.sqlite.org/windowfunctions.html
-	- https://www.sqlitetutorial.net/sqlite-window-functions/
+- Kilka linków do materiałów które mogą być pomocne - https://learn.microsoft.com/en-us/sql/t-sql/queries/select-over-clause-transact-sql?view=sql-server-ver16
+
+  - https://www.sqlservertutorial.net/sql-server-window-functions/
+  - https://www.sqlshack.com/use-window-functions-sql-server/
+  - https://www.postgresql.org/docs/current/tutorial-window.html
+  - https://www.postgresqltutorial.com/postgresql-window-function/
+  - https://www.sqlite.org/windowfunctions.html
+  - https://www.sqlitetutorial.net/sqlite-window-functions/
 
 - Ikonki używane w graficznej prezentacji planu zapytania w SSMS opisane są tutaj:
-	- [https://docs.microsoft.com/en-us/sql/relational-databases/showplan-logical-and-physical-operators-reference](https://docs.microsoft.com/en-us/sql/relational-databases/showplan-logical-and-physical-operators-reference)
+  - [https://docs.microsoft.com/en-us/sql/relational-databases/showplan-logical-and-physical-operators-reference](https://docs.microsoft.com/en-us/sql/relational-databases/showplan-logical-and-physical-operators-reference)
 
 ---
+
 # Zadanie 1 - obserwacja
 
 Wykonaj i porównaj wyniki następujących poleceń.
@@ -89,6 +90,7 @@ W przypadku grupowania wynik jest obliczany dla każdej grupy, a w przypadku fun
 ```
 
 ---
+
 # Zadanie 2 - obserwacja
 
 Wykonaj i porównaj wyniki następujących poleceń.
@@ -108,10 +110,10 @@ from products p
 where productid < 10
 ```
 
+Jaka jest różnica? Czego dotyczy warunek w każdym z przypadków? Napisz polecenie równoważne
 
-Jaka jest różnica? Czego dotyczy warunek w każdym z przypadków? Napisz polecenie równoważne 
-- 1) z wykorzystaniem funkcji okna. Napisz polecenie równoważne 
-- 2) z wykorzystaniem podzapytania
+- 1. z wykorzystaniem funkcji okna. Napisz polecenie równoważne
+- 2. z wykorzystaniem podzapytania
 
 ```
 W wyniku pierwszego zapytania otrzymaliśmy średnią cenę wszystkich produktów dla każdego produktu, który ma id mniejsze niż 10.
@@ -119,6 +121,7 @@ W wyniku drugiego zapytania otrzymaliśmy średnią cenę produktów, które maj
 
 W pierwszym zapytaniu warunek nie dotyczył podzapytania, a w drugim zapytaniu warunek dotyczył funkcji okna.
 ```
+
 ```sql
 -- Polecenie równoważne 1) z wykorzystaniem funkcji okna:
 with av as (
@@ -154,9 +157,7 @@ W DataGrip użyj opcji Explain Plan/Explain Analyze
 
 ![w:700](_img/window-2.png)
 
-
 ![w:700](_img/window-3.png)
-
 
 ```sql
 -- podzapytanie
@@ -182,27 +183,34 @@ from products p;
 ```
 
 ### MSSQL
+
 Podzapytanie\
 ![w:700](_img/3mssql1.jpg)
 Join\
 ![w:700](_img/3mssql2.jpg)
 Funkcja okna\
 ![w:700](_img/3mssql3.jpg)
+
 ### SQLite
+
 Podzapytanie\
 ![w:700](_img/3sqllite1.jpg)
 Join\
 ![w:700](_img/3sqllite2.jpg)
 Funkcja okna\
 ![w:700](_img/3sqllite3.jpg)
+
 ---
+
 ### PostgreSQL
+
 Podzapytanie\
 ![w:700](_img/3postgre1.jpg)
 Join\
 ![w:700](_img/3postgre2.jpg)
 Funkcja okna\
 ![w:700](_img/3postgre3.jpg)
+
 ---
 
 ---
@@ -245,8 +253,37 @@ select * from av
 where unitPrice > avgPrice;
 ```
 
+### MSSQL
+
+Podzapytanie\
+![w:700](_img/4mssql1.jpg)
+Join\
+![w:700](_img/4mssql2.jpg)
+Funkcja okna\
+![w:700](_img/4mssql3.jpg)
+
+### SQLite
+
+Podzapytanie\
+![w:700](_img/4sqlilite1.jpg)
+Join\
+![w:700](_img/4sqllite2.jpg)
+Funkcja okna\
+![w:700](_img/4sqlilite3.jpg)
 
 ---
+
+### PostgreSQL
+
+Podzapytanie\
+![w:700](_img/4postgre1.jpg)
+Join\
+![w:700](_img/4postgre2.jpg)
+Funkcja okna\
+![w:700](_img/4postgre3.jpg)
+
+---
+
 # Zadanie 5 - przygotowanie
 
 Baza: Northwind
@@ -283,30 +320,29 @@ Dla 30000 iteracji, tabela będzie zawierała nieco ponad 2mln wierszy (dostostu
 Skrypt dla SQL Srerver
 
 ```sql
-declare @i int  
-set @i = 1  
-while @i <= 30000  
-begin  
-    insert product_history  
-    select productid, ProductName, SupplierID, CategoryID,   
-         QuantityPerUnit,round(RAND()*unitprice + 10,2),  
-         cast(RAND() * productid + 10 as int), 0,  
-         dateadd(day, @i, '1940-01-01')  
-    from products  
-    set @i = @i + 1;  
-end;  
-  
-update product_history  
-set value = unitprice * quantity  
+declare @i int
+set @i = 1
+while @i <= 30000
+begin
+    insert product_history
+    select productid, ProductName, SupplierID, CategoryID,
+         QuantityPerUnit,round(RAND()*unitprice + 10,2),
+         cast(RAND() * productid + 10 as int), 0,
+         dateadd(day, @i, '1940-01-01')
+    from products
+    set @i = @i + 1;
+end;
+
+update product_history
+set value = unitprice * quantity
 where 1=1;
 ```
-
 
 Skrypt dla Postgresql
 
 ```sql
 create table product_history(
-		 id int generated always as identity not null  
+		 id int generated always as identity not null
 						 constraint pkproduct_history
 											 primary key,
 		 productid int,
@@ -326,28 +362,27 @@ Wygeneruj przykładowe dane:
 Skrypt dla Postgresql
 
 ```sql
-do $$  
-begin  
-  for cnt in 1..30000 loop  
-    insert into product_history(productid, productname, supplierid,   
-           categoryid, quantityperunit,  
-           unitprice, quantity, value, date)  
-    select productid, productname, supplierid, categoryid,   
-           quantityperunit,  
-           round((random()*unitprice + 10)::numeric,2),  
-           cast(random() * productid + 10 as int), 0,  
-           cast('1940-01-01' as date) + cnt  
-    from products;  
-  end loop;  
-end; $$;  
-  
-update product_history  
-set value = unitprice * quantity  
+do $$
+begin
+  for cnt in 1..30000 loop
+    insert into product_history(productid, productname, supplierid,
+           categoryid, quantityperunit,
+           unitprice, quantity, value, date)
+    select productid, productname, supplierid, categoryid,
+           quantityperunit,
+           round((random()*unitprice + 10)::numeric,2),
+           cast(random() * productid + 10 as int), 0,
+           cast('1940-01-01' as date) + cnt
+    from products;
+  end loop;
+end; $$;
+
+update product_history
+set value = unitprice * quantity
 where 1=1;
 ```
 
-
-Wykonaj polecenia: `select count(*) from product_history`,  potwierdzające wykonanie zadania
+Wykonaj polecenia: `select count(*) from product_history`, potwierdzające wykonanie zadania
 
 MSSQL\
 ![w:700](_img/5_mssql.png)\
@@ -357,6 +392,7 @@ SQLite\
 ![w:700](_img/5_sqlite.png)
 
 ---
+
 # Zadanie 6
 
 Baza: Northwind, tabela product_history
@@ -368,7 +404,6 @@ Napisz polecenie, które zwraca: id pozycji, id produktu, nazwę produktu, cenę
 Napisz polecenie z wykorzystaniem podzapytania, join'a oraz funkcji okna. Porównaj zapytania. Porównaj czasy oraz plany wykonania zapytań.
 
 Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
-
 
 ```sql
 -- podzapytanie
@@ -398,8 +433,25 @@ select * from av
 where unitPrice > avgPrice;
 ```
 
+```
+MSSQL
+Podzapytanie - wyniki przyrostowe (100 wierszy co ok. 500 milisekund)
+Join - wyniki przyrostowe (100 wierszy co ok. 800 milisekund)
+Funkcja okna - wyniki przyrostowe (100 wierszy co ok. 950 milisekund)
+
+SQLite
+Podzapytanie - wyniki przyrostowe (100 wierszy co ok. 20 sekund)
+Join - wyniki przyrostowe (100 wierszy co ok. 120 milisekund)
+Funkcja okna - wyniki przyrostowe (100 wierszy co ok. 160 milisekund)
+
+PostgreSQL
+Podzapytanie - za długo aby ocenić
+Join - wyniki przyrostowe (100 wierszy co ok. 160 milisekund)
+Funkcja okna - wyniki przyrostowe (100 wierszy co ok. 400 milisekund)
+```
 
 ---
+
 # Zadanie 7
 
 Baza: Northwind, tabela product_history
@@ -407,9 +459,10 @@ Baza: Northwind, tabela product_history
 Lekka modyfikacja poprzedniego zadania
 
 Napisz polecenie, które zwraca: id pozycji, id produktu, nazwę produktu, cenę produktu oraz
--  średnią cenę produktów w kategorii do której należy dany produkt.
--  łączną wartość sprzedaży produktów danej kategorii (suma dla pola value)
--  średnią cenę danego produktu w roku którego dotyczy dana pozycja
+
+- średnią cenę produktów w kategorii do której należy dany produkt.
+- łączną wartość sprzedaży produktów danej kategorii (suma dla pola value)
+- średnią cenę danego produktu w roku którego dotyczy dana pozycja
 - łączną wartość sprzedaży produktów danej kategorii (suma dla pola value)
 
 Napisz polecenie z wykorzystaniem podzapytania, join'a oraz funkcji okna. Porównaj zapytania. W przypadku funkcji okna spróbuj użyć klauzuli WINDOW.
@@ -417,7 +470,6 @@ Napisz polecenie z wykorzystaniem podzapytania, join'a oraz funkcji okna. Porów
 Porównaj czasy oraz plany wykonania zapytań.
 
 Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
-
 
 ```sql
 -- podzapytanie
@@ -451,25 +503,44 @@ from product_history p
 window w as (partition by p.categoryId);
 ```
 
+```
+MSSQL
+Podzapytanie - za długo aby ocenić
+Join - wyniki przyrostowe (100 wierszy co ok. 3 sekundy)
+Funkcja okna - did't work at all
+
+SQLite
+Podzapytanie - za długo aby ocenić
+Join - wyniki przyrostowe (100 wierszy co ok. 800 milisekund)
+Funkcja okna - wyniki przyrostowe (100 wierszy co ok. 650 milisekund)
+
+PostgreSQL
+Podzapytanie - za długo aby ocenić
+Join - did't work at all
+Funkcja okna - wyniki przyrostowe (100 wierszy co ok. 800 milisekund)
+```
+
 ---
+
 # Zadanie 8 - obserwacja
 
 Funkcje rankingu, `row_number()`, `rank()`, `dense_rank()`
 
 Wykonaj polecenie, zaobserwuj wynik. Porównaj funkcje row_number(), rank(), dense_rank()
 
-```sql 
-select productid, productname, unitprice, categoryid,  
-    row_number() over(partition by categoryid order by unitprice desc) as rowno,  
-    rank() over(partition by categoryid order by unitprice desc) as rankprice,  
-    dense_rank() over(partition by categoryid order by unitprice desc) as denserankprice  
+```sql
+select productid, productname, unitprice, categoryid,
+    row_number() over(partition by categoryid order by unitprice desc) as rowno,
+    rank() over(partition by categoryid order by unitprice desc) as rankprice,
+    dense_rank() over(partition by categoryid order by unitprice desc) as denserankprice
 from products;
 ```
 
-```sql
---- wyniki ...
 ```
-
+row_number() - unikalny numer dla kazdego w partycji
+rank() - te same rangi dla powiązanych i odpowiednio przeskakuje rangi przy tym
+dense_rank() - te same rangi dla powiązanych i odpowiednio nie przeskakuje rangi przy tym
+```
 
 Zadanie
 
@@ -489,13 +560,14 @@ from products p
 order by p.CategoryID, p.UnitPrice desc, p.ProductID;
 ```
 
-
 ---
+
 # Zadanie 9
 
 Baza: Northwind, tabela product_history
 
 Dla każdego produktu, podaj 4 najwyższe ceny tego produktu w danym roku. Zbiór wynikowy powinien zawierać:
+
 - rok
 - id produktu
 - nazwę produktu
@@ -516,9 +588,7 @@ where rankprice <= 4
 order by year, productid, rankprice;
 ```
 
-
 Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czasy i plany zapytań. Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
-
 
 ```sql
 with r as (
@@ -534,7 +604,45 @@ where rankprice <= 4
 order by year, productid, rankprice;
 ```
 
+```
+MSSQL
+z over - wyniki przyrostowe (500 wierszy 450 milisekund)
+```
+
+![w:700](_img/9mssql1.jpg)
+
+```
+bez over - za długo
+```
+
+```
+
+SQLite
+z over - wyniki przyrostowe (500 wierszy 1870 milisekund)
+
+```
+
+![w:700](_img/9sqlite1.jpg)
+
+```
+bez over - za długo
+```
+
+```
+
+PostgreSQL
+z over - wyniki przyrostowe (500 wierszy 9 sekund)
+```
+
+![w:700](_img/9postgre1.jpg)
+
+```
+bez over - za długo
+
+```
+
 ---
+
 # Zadanie 10 - obserwacja
 
 Funkcje `lag()`, `lead()`
@@ -542,26 +650,30 @@ Funkcje `lag()`, `lead()`
 Wykonaj polecenia, zaobserwuj wynik. Jak działają funkcje `lag()`, `lead()`
 
 ```sql
-select productid, productname, categoryid, date, unitprice,  
-       lag(unitprice) over (partition by productid order by date)   
-as previousprodprice,  
-       lead(unitprice) over (partition by productid order by date)   
-as nextprodprice  
-from product_history  
-where productid = 1 and year(date) = 2022  
-order by date;  
-  
-with t as (select productid, productname, categoryid, date, unitprice,  
-                  lag(unitprice) over (partition by productid   
-order by date) as previousprodprice,  
-                  lead(unitprice) over (partition by productid   
-order by date) as nextprodprice  
-           from product_history  
-           )  
-select * from t  
-where productid = 1 and year(date) = 2022  
+select productid, productname, categoryid, date, unitprice,
+       lag(unitprice) over (partition by productid order by date)
+as previousprodprice,
+       lead(unitprice) over (partition by productid order by date)
+as nextprodprice
+from product_history
+where productid = 1 and year(date) = 2022
+order by date;
+
+with t as (select productid, productname, categoryid, date, unitprice,
+                  lag(unitprice) over (partition by productid
+order by date) as previousprodprice,
+                  lead(unitprice) over (partition by productid
+order by date) as nextprodprice
+           from product_history
+           )
+select * from t
+where productid = 1 and year(date) = 2022
 order by date;
 ```
+
+Zadanie
+
+Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czasy i plany zapytań. Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 
 ```sql
 select p.productid, p.productname, p.categoryid, p.date, p.unitprice,
@@ -574,16 +686,16 @@ where productid = 1 and year(date) = 2022
 order by date;
 ```
 
+```
+lag() - wyciąga poprzednią wartość
+lead() - wyciąga następną wartość
 
-Zadanie
+bez uzycia funkcji okna wykonanie trwa kilkadziesiąt razy dłuzej
 
-Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czasy i plany zapytań. Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
-
-```sql
--- wyniki ...
 ```
 
 ---
+
 # Zadanie 11
 
 Baza: Northwind, tabele customers, orders, order details
@@ -591,6 +703,7 @@ Baza: Northwind, tabele customers, orders, order details
 Napisz polecenie które wyświetla inf. o zamówieniach
 
 Zbiór wynikowy powinien zawierać:
+
 - nazwę klienta, nr zamówienia,
 - datę zamówienia,
 - wartość zamówienia (wraz z opłatą za przesyłkę),
@@ -609,8 +722,8 @@ inner join Customers c on o.CustomerID = c.CustomerID
 group by c.CompanyName, o.OrderID, o.OrderDate, o.Freight
 ```
 
-
 ---
+
 # Zadanie 12 - obserwacja
 
 Funkcje `first_value()`, `last_value()`
@@ -618,12 +731,12 @@ Funkcje `first_value()`, `last_value()`
 Wykonaj polecenia, zaobserwuj wynik. Jak działają funkcje `first_value()`, `last_value()`. Skomentuj uzyskane wyniki. Czy funkcja `first_value` pokazuje w tym przypadku najdroższy produkt w danej kategorii, czy funkcja `last_value()` pokazuje najtańszy produkt? Co jest przyczyną takiego działania funkcji `last_value`. Co trzeba zmienić żeby funkcja last_value pokazywała najtańszy produkt w danej kategorii
 
 ```sql
-select productid, productname, unitprice, categoryid,  
-    first_value(productname) over (partition by categoryid   
-order by unitprice desc) first,  
-    last_value(productname) over (partition by categoryid   
-order by unitprice desc) last  
-from products  
+select productid, productname, unitprice, categoryid,
+    first_value(productname) over (partition by categoryid
+order by unitprice desc) first,
+    last_value(productname) over (partition by categoryid
+order by unitprice desc) last
+from products
 order by categoryid, unitprice desc;
 ```
 
@@ -650,6 +763,7 @@ order by p.categoryid, p.unitprice desc;
 ```
 
 ---
+
 # Zadanie 13
 
 Baza: Northwind, tabele orders, order details
@@ -657,18 +771,19 @@ Baza: Northwind, tabele orders, order details
 Napisz polecenie które wyświetla inf. o zamówieniach
 
 Zbiór wynikowy powinien zawierać:
+
 - Id klienta,
 - nr zamówienia,
 - datę zamówienia,
 - wartość zamówienia (wraz z opłatą za przesyłkę),
 - dane zamówienia klienta o najniższej wartości w danym miesiącu
-	- nr zamówienia o najniższej wartości w danym miesiącu
-	- datę tego zamówienia
-	- wartość tego zamówienia
+  - nr zamówienia o najniższej wartości w danym miesiącu
+  - datę tego zamówienia
+  - wartość tego zamówienia
 - dane zamówienia klienta o najwyższej wartości w danym miesiącu
-	- nr zamówienia o najniższej wartości w danym miesiącu
-	- datę tego zamówienia
-	- wartość tego zamówienia
+  - nr zamówienia o najniższej wartości w danym miesiącu
+  - datę tego zamówienia
+  - wartość tego zamówienia
 
 ```sql
 with r as (
@@ -685,6 +800,7 @@ from r
 ```
 
 ---
+
 # Zadanie 14
 
 Baza: Northwind, tabela product_history
@@ -692,6 +808,7 @@ Baza: Northwind, tabela product_history
 Napisz polecenie które pokaże wartość sprzedaży każdego produktu narastająco od początku każdego miesiąca. Użyj funkcji okna
 
 Zbiór wynikowy powinien zawierać:
+
 - id pozycji
 - id produktu
 - datę
@@ -719,6 +836,7 @@ order by ph.productid, ph.date;
 ```
 
 ---
+
 # Zadanie 15
 
 Wykonaj kilka "własnych" przykładowych analiz. Czy są jeszcze jakieś ciekawe/przydatne funkcje okna (z których nie korzystałeś w ćwiczeniu)? Spróbuj ich użyć w zaprezentowanych przykładach.
@@ -726,7 +844,6 @@ Wykonaj kilka "własnych" przykładowych analiz. Czy są jeszcze jakieś ciekawe
 ```sql
 -- wyniki ...
 ```
-
 
 Punktacja
 
