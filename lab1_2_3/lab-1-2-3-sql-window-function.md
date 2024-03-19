@@ -671,6 +671,12 @@ where productid = 1 and year(date) = 2022
 order by date;
 ```
 
+```
+Drugie zapytanie działa lepiej, jednak jego wykonanie zajmuje dwa razy więcej czasu
+1. 140 milisekund
+2. 290 milisekund
+```
+
 Zadanie
 
 Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czasy i plany zapytań. Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
@@ -760,6 +766,25 @@ select p.productid, p.productname, p.unitprice, p.categoryid,
     (select top 1 productname from Products where p.CategoryID = CategoryID order by UnitPrice) as last
 from products p
 order by p.categoryid, p.unitprice desc;
+```
+
+```
+MSSQL
+z over - 100 milisekund
+```
+
+![w:700](_img/12mssql1.jpg)
+
+```
+bez over - 100 milisekund
+```
+
+![w:700](_img/12mssql2.jpg)
+
+```
+W przypadku tak małego zapytania cięzko zobaczyć róznicę w czasie
+
+Dla SQLite i Postgre wyniki wynosiły po 50 milisekund jednak prawdopodobnie jest to spowodowane jedynie zdalnym połączeniem z MSSQL vs lokalnym połączeniem dla SQLite vs Postgre
 ```
 
 ---
