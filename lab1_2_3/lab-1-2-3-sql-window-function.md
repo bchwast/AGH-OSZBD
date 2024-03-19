@@ -733,6 +733,49 @@ lead() - wyciąga następną wartość
 
 bez uzycia funkcji okna wykonanie trwa kilkadziesiąt razy dłuzej
 
+Plany
+
+MSSQL
+z over
+```
+
+![w:700](_img/10mssql1.jpg)
+
+```
+bez over
+```
+
+![w:700](_img/10mssql2.jpg)
+
+```
+Dla funkcji okna mamy dłuuugą serie sekwencyjnych polecień,
+odwrotnie dla funkcji nie uzywajacej okna, w tym przypadku mamy więcej równoległych działań, jednak nie przekłada się to na lepszy czas
+
+Porównajmy jeszcze plany wykonania funkcji bez okna dla wszystkich trzech SZBD
+```
+
+```
+MSSQL
+```
+
+![w:700](_img/10mssql2.jpg)
+
+```
+SQLite
+```
+
+![w:700](_img/10sqlite2.jpg)
+
+```
+PostgreSQL
+```
+
+![w:700](_img/10postgre2.jpg)
+
+```
+Plan dla MSSQL jest duzo bardziej złozony względem pozostałych planów
+
+Tak samo jak w poprzednich zadaniach widać zdecydowaną przewagę wydajności funkcji okna
 ```
 
 ---
@@ -893,6 +936,39 @@ select ph.id, ph.productid, ph.date, ph.value,
 from product_history ph
 order by ph.productid, ph.date;
 
+```
+
+```
+Czasy wykonania - dla funkcji okna
+MSSQL - wyniki przyrostowe (500 wierszy w 19 sekund)
+SQLite - wyniki przyrostowe (500 wierszy w 4 sekund)
+PostgreSQL - wyniki przyrostowe (500 wierszy w 10 sekund)
+
+Dla podzapytań bez funkcji okna nie doczekaliśmy momentu w którym zobaczyliśmy wyniki
+```
+
+```
+Plany zapytań dla funkcji okna
+
+MSSQL
+```
+
+![w:700](_img/14mssql1.jpg)
+
+```
+SQLite
+```
+
+![w:700](_img/14sqlite1.jpg)
+
+```
+Postgre
+```
+
+![w:700](_img/14postgre1.jpg)
+
+```
+Poziom skomplikowania planów wydaje się adekwatny do uzyskanych czasów.
 ```
 
 ---
