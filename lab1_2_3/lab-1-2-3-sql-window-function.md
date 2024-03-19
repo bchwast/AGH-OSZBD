@@ -191,6 +191,10 @@ Join\
 Funkcja okna\
 ![w:700](_img/3mssql3.jpg)
 
+```
+W przypadku użycia funkcji okna, plan wykonania ma więcej kroków wykonywanych równolegle.
+Plan wykonania z użyciem podzapytania wygląda na najprostszy, ale kroki wykonują się sekwencyjnie.
+```
 ### SQLite
 
 Podzapytanie\
@@ -200,7 +204,11 @@ Join\
 Funkcja okna\
 ![w:700](_img/3sqllite3.jpg)
 
----
+```
+Dla SQLite'a wygenerowane plany wykonania są dużo mniej szczegółowo opisane niż dla pozostałych SZBD.
+W przypadku joina plan wykonujemy równologle 3 kroki, jednakże ilość wykonanych akcji jest również większa.
+W podzapytaniu i funkcji okna wykonywane są dwukrotnie pełne skany tabel, dla joina wykonujemy skany indeksowe.
+```
 
 ### PostgreSQL
 
@@ -211,8 +219,18 @@ Join\
 Funkcja okna\
 ![w:700](_img/3postgre3.jpg)
 
----
+```
+PostgreSQL ma najprostszy plan wykonania dla użycia funkcji okna.
+Plan wykonania z użyciem joina jest najbardziej skomplikowany i wskazuje na trzykrotne wykonanie pełnego skanu tabeli.
+```
 
+```
+Czasy wykonania dla każdego zapytania są zbliżone, nie jesteśmy w stanie stwierdzić, które zapytanie jest najszybsze, 
+ponieważ czasy wykonania są na tyle niskie, że czynnik zewnętrzne mogły mieć większy wpływ na wydajność.
+
+Dla PostgreSQL możemy zaobserwować, że plan wykonania przy uzyciu funkcji okna jest najprostszy 
+i użycie takiej konstrukcji przyniosło najwięcej korzyści.
+```
 ---
 
 # Zadanie 4
@@ -262,6 +280,11 @@ Join\
 Funkcja okna\
 ![w:700](_img/4mssql3.jpg)
 
+```
+Dla podzapytania plan wykonania wygląda na najbardziej skomplikowany, jednakże w każdym z trzech przypadków 
+możemy zaobserwować zrównoleglenie wykoniania poszczególnych kroków.
+```
+
 ### SQLite
 
 Podzapytanie\
@@ -271,7 +294,10 @@ Join\
 Funkcja okna\
 ![w:700](_img/4sqlilite3.jpg)
 
----
+```
+Dla podzapytania i joina możemy mówić o dość podobnym planie wykonania, z widocznym wykonaniem podzapytań w pierwszym przypadku.
+Dla funkcji okna mamy dłuższy łańcuch wykonywanych kroków, z dwoma pełnymi skanami a jednym indeksowym.
+```
 
 ### PostgreSQL
 
@@ -281,6 +307,15 @@ Join\
 ![w:700](_img/4postgre2.jpg)
 Funkcja okna\
 ![w:700](_img/4postgre3.jpg)
+
+```
+Ponownie, korzystając z PostgreSQL otrzymaliśmy najprostszy plan wykonania dla funkcji okna.
+```
+
+```
+Łatwo zauważyć, że plany wykonania w MSSQL są zdecydowanie najbardziej skomplikowane, z dużą ilością wykonywanych kroków.
+Pod względem czasów wykonania, ponownie nie jesteśmy w stanie wykonać sensownego porównania, poprzez zbyt małą ilość danych w tabeli.
+```
 
 ---
 
