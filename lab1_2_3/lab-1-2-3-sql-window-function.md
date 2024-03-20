@@ -1246,6 +1246,8 @@ ORDER BY
 
 Spróbuj wykonać zadanie bez użycia funkcji okna. Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czasy i plany zapytań. Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 
+### MSSQL
+
 ```sql
 select ph.id, ph.productid, ph.date, ph.value,
     (select sum(ph2.value) from product_history ph2
@@ -1254,7 +1256,48 @@ select ph.id, ph.productid, ph.date, ph.value,
             and month(ph2.date) = month(ph.date)) as running_total
 from product_history ph
 order by ph.productid, ph.date;
+```
 
+### SQLite
+
+```sql
+SELECT
+    ph.id,
+    ph.productid,
+    ph.date,
+    ph.value,
+    (SELECT SUM(ph2.value)
+     FROM product_history ph2
+     WHERE ph2.productid = ph.productid
+       AND strftime('%Y', ph2.date) = strftime('%Y', ph.date)
+       AND strftime('%m', ph2.date) = strftime('%m', ph.date)
+    ) AS running_total
+FROM
+    product_history ph
+ORDER BY
+    ph.productid,
+    ph.date;
+```
+
+### PostgreSQL
+
+```sql
+SELECT
+    ph.id,
+    ph.productid,
+    ph.date,
+    ph.value,
+    (SELECT SUM(ph2.value)
+     FROM product_history ph2
+     WHERE ph2.productid = ph.productid
+       AND EXTRACT(YEAR FROM ph2.date) = EXTRACT(YEAR FROM ph.date)
+       AND EXTRACT(MONTH FROM ph2.date) = EXTRACT(MONTH FROM ph.date)
+    ) AS running_total
+FROM
+    product_history ph
+ORDER BY
+    ph.productid,
+    ph.date;
 ```
 
 ```
