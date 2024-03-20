@@ -208,6 +208,7 @@ Funkcja okna\
 W przypadku użycia funkcji okna, plan wykonania ma więcej kroków wykonywanych równolegle.
 Plan wykonania z użyciem podzapytania wygląda na najprostszy, ale kroki wykonują się sekwencyjnie.
 ```
+
 ### SQLite
 
 Podzapytanie\
@@ -238,12 +239,13 @@ Plan wykonania z użyciem joina jest najbardziej skomplikowany i wskazuje na trz
 ```
 
 ```
-Czasy wykonania dla każdego zapytania są zbliżone - około 100ms, nie jesteśmy w stanie stwierdzić, które zapytanie jest najszybsze, 
+Czasy wykonania dla każdego zapytania są zbliżone - około 100ms, nie jesteśmy w stanie stwierdzić, które zapytanie jest najszybsze,
 ponieważ czasy wykonania są na tyle niskie, że czynnik zewnętrzne mogły mieć większy wpływ na wydajność.
 
-Dla PostgreSQL możemy zaobserwować, że plan wykonania przy uzyciu funkcji okna jest najprostszy 
+Dla PostgreSQL możemy zaobserwować, że plan wykonania przy uzyciu funkcji okna jest najprostszy
 i użycie takiej konstrukcji przyniosło najwięcej korzyści.
 ```
+
 ---
 
 # Zadanie 4
@@ -296,7 +298,7 @@ Funkcja okna\
 ![w:700](_img/4mssql3.jpg)
 
 ```
-Dla podzapytania plan wykonania wygląda na najbardziej skomplikowany, jeden raz więcej wykonywane są zagnieżdżone pętle 
+Dla podzapytania plan wykonania wygląda na najbardziej skomplikowany, jeden raz więcej wykonywane są zagnieżdżone pętle
 oraz pęłny indx scan, w każdym z trzech przypadków możemy zaobserwować zrównoleglenie wykoniania poszczególnych kroków.
 ```
 
@@ -324,7 +326,7 @@ Funkcja okna\
 ![w:700](_img/4postgre3.jpg)
 
 ```
-Ponownie, korzystając z PostgreSQL otrzymaliśmy najprostszy plan wykonania dla funkcji okna, dla podzapytania i joina 
+Ponownie, korzystając z PostgreSQL otrzymaliśmy najprostszy plan wykonania dla funkcji okna, dla podzapytania i joina
 wykonywane były dodatkowe pełne skany tabeli (łącznie trzy dla podzapytania i dwa dla joina)
 ```
 
@@ -497,7 +499,7 @@ Funkcja okna\
 ![w:700](_img/6mssql3.jpg)
 
 ```
-Plany wykonania wyglądają podobnie jak w zadaniu 4-tym. Kolejno dla podzapytania, joina i funkcji okna wykonuje się 
+Plany wykonania wyglądają podobnie jak w zadaniu 4-tym. Kolejno dla podzapytania, joina i funkcji okna wykonuje się
 coraz mniej kroków, a plan wykonania jest coraz prostszy. Ilość full index scanów maleje od 3 do 1.
 ```
 
@@ -570,6 +572,7 @@ Porównaj czasy oraz plany wykonania zapytań.
 Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 
 ### MSSQL
+
 ```sql
 -- podzapytanie
 select p.id, p.productId, p.productName, p.unitPrice,
@@ -610,12 +613,13 @@ Funkcja okna\
 ![w:700](_img/7mssql3.jpg)
 
 ```
-Dla joina widzimy zrównoleglone kroki z łącznie trzema pełnymi skanami tabeli. W przypadku funkcji okna wszystkie kroki 
+Dla joina widzimy zrównoleglone kroki z łącznie trzema pełnymi skanami tabeli. W przypadku funkcji okna wszystkie kroki
 wykonują się sekwencyjnie i potrzebny jest tylko jeden pełny skan.
 Dla podzapytania widoczne cztery pełne skany i zagnieżdżone pętle, co z pewnością miało wpływ na czas wykonania.
 ```
 
 ### SQLite
+
 ```sql
 -- podzapytanie
 select p.id, p.productId, p.productName, p.unitPrice,
@@ -656,11 +660,12 @@ Funkcja okna\
 ![w:700](_img/7sqlite3.jpg)
 
 ```
-W podzapytaniu mamy widoczne wywołania podzapytań, w przypadku joina widzimy dużo równoległych kroków, a dla funkcji okna 
+W podzapytaniu mamy widoczne wywołania podzapytań, w przypadku joina widzimy dużo równoległych kroków, a dla funkcji okna
 plan jest wizualnie czymś pomiędzy podzapytaniem a joinem. Z powodu ubogiego opisu ciężko wywnioskować wiele z tych planów.
 ```
 
 ### PostgreSQL
+
 ```sql
 -- podzapytanie
 select p.id, p.productId, p.productName, p.unitPrice,
@@ -701,7 +706,7 @@ Funkcja okna\
 ![w:700](_img/7postgre3.jpg)
 
 ```
-Dla joina widzimy zrównoleglone kroki z łącznie trzema pełnymi skanami tabeli. W przypadku funkcji okna wszystkie kroki 
+Dla joina widzimy zrównoleglone kroki z łącznie trzema pełnymi skanami tabeli. W przypadku funkcji okna wszystkie kroki
 wykonują się sekwencyjnie i potrzebny jest tylko jeden pełny skan.
 Dla podzapytanbia łącznie cztery pełne skany i bardzo kosztowne agregacje.
 Charakterystyka planów bardzo podobna do tych z MSSQL.
@@ -788,6 +793,7 @@ Uporządkuj wynik wg roku, nr produktu, pozycji w rankingu
 Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czasy i plany zapytań. Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 
 ### MSSQL
+
 ```sql
 --- funkcja okna
 with r as (
@@ -825,6 +831,7 @@ podzapytanie - za długo
 ```
 
 ### SQLite
+
 ```sql
 --- funkcja okna
 with r as (
@@ -862,6 +869,7 @@ podzapytanie - za długo
 ```
 
 ### PostgreSQL
+
 ```sql
 --- funkcja okna
 with r as (
@@ -1101,6 +1109,7 @@ Zadanie
 Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czasy i plany zapytań. Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 
 ### MSSQL
+
 ```sql
 select p.productid, p.productname, p.unitprice, p.categoryid,
     (select top 1 productname from Products where p.CategoryID = CategoryID order by UnitPrice desc) as first,
@@ -1122,6 +1131,7 @@ podzapytanie - 100 milisekund
 ![w:700](_img/12mssql2.jpg)
 
 ### SQLite / PostgreSQL
+
 ```sql
 select p.productid, p.productname, p.unitprice, p.categoryid,
     (select productname from Products where p.CategoryID = CategoryID order by UnitPrice desc limit 1) as first,
@@ -1191,11 +1201,45 @@ Zbiór wynikowy powinien zawierać:
 - wartość sprzedaży produktu w danym dniu
 - wartość sprzedaży produktu narastające od początku miesiąca
 
+### MSSQL
+
 ```sql
 select ph.id, ph.productid, ph.date, ph.value,
     sum(ph.value) over (partition by ph.productid, year(ph.date), month(ph.date) order by ph.date) as running_total
 from product_history ph
 order by ph.productid, ph.date;
+```
+
+### SQLite
+
+```sql
+SELECT
+    ph.id,
+    ph.productid,
+    ph.date,
+    ph.value,
+    SUM(ph.value) OVER (PARTITION BY ph.productid, strftime('%Y', ph.date), strftime('%m', ph.date) ORDER BY ph.date) AS running_total
+FROM
+    product_history ph
+ORDER BY
+    ph.productid,
+    ph.date;
+```
+
+### PostgreSQL
+
+```sql
+SELECT
+    ph.id,
+    ph.productid,
+    ph.date,
+    ph.value,
+    SUM(ph.value) OVER (PARTITION BY ph.productid, EXTRACT(YEAR FROM ph.date), EXTRACT(MONTH FROM ph.date) ORDER BY ph.date) AS running_total
+FROM
+    product_history ph
+ORDER BY
+    ph.productid,
+    ph.date;
 ```
 
 ![w:700](_img/14query1.jpg)
