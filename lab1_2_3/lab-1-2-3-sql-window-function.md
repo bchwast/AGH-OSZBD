@@ -79,6 +79,11 @@ from products p;
 
 Jaka jest są podobieństwa, jakie różnice pomiędzy grupowaniem danych a działaniem funkcji okna?
 
+![w:700](_img/1query1.jpg)
+![w:700](_img/1query2.jpg)
+![w:700](_img/1query3.jpg)
+![w:700](_img/1query4.jpg)
+
 ```
 W wyniku pierwszego zapytania otrzymaliśmy jedną wartość - średnią cenę wszystkich produktów.
 W wyniku drugiego zapytania otrzymaliśmy tyle samo wartości ile w tabeli, ale wszystkie są równe średniej cenie wszystkich produktów.
@@ -110,6 +115,9 @@ from products p
 where productid < 10
 ```
 
+![w:700](_img/2query1.jpg)
+![w:700](_img/2query2.jpg)
+
 Jaka jest różnica? Czego dotyczy warunek w każdym z przypadków? Napisz polecenie równoważne
 
 - 1. z wykorzystaniem funkcji okna. Napisz polecenie równoważne
@@ -138,6 +146,9 @@ select p.productid, p.ProductName, p.unitprice,
 from products p
 where productid < 10
 ```
+
+![w:700](_img/2query3.jpg)
+![w:700](_img/2query4.jpg)
 
 # Zadanie 3
 
@@ -182,6 +193,8 @@ select p.productId, p.productName, p.unitPrice,
 from products p;
 ```
 
+![w:700](_img/3query.jpg)
+
 ### MSSQL
 
 Podzapytanie\
@@ -225,7 +238,7 @@ Plan wykonania z użyciem joina jest najbardziej skomplikowany i wskazuje na trz
 ```
 
 ```
-Czasy wykonania dla każdego zapytania są zbliżone, nie jesteśmy w stanie stwierdzić, które zapytanie jest najszybsze, 
+Czasy wykonania dla każdego zapytania są zbliżone - około 100ms, nie jesteśmy w stanie stwierdzić, które zapytanie jest najszybsze, 
 ponieważ czasy wykonania są na tyle niskie, że czynnik zewnętrzne mogły mieć większy wpływ na wydajność.
 
 Dla PostgreSQL możemy zaobserwować, że plan wykonania przy uzyciu funkcji okna jest najprostszy 
@@ -271,6 +284,8 @@ select * from av
 where unitPrice > avgPrice;
 ```
 
+![w:700](_img/4query.jpg)
+
 ### MSSQL
 
 Podzapytanie\
@@ -281,8 +296,8 @@ Funkcja okna\
 ![w:700](_img/4mssql3.jpg)
 
 ```
-Dla podzapytania plan wykonania wygląda na najbardziej skomplikowany, jednakże w każdym z trzech przypadków 
-możemy zaobserwować zrównoleglenie wykoniania poszczególnych kroków.
+Dla podzapytania plan wykonania wygląda na najbardziej skomplikowany, jeden raz więcej wykonywane są zagnieżdżone pętle 
+oraz pęłny indx scan, w każdym z trzech przypadków możemy zaobserwować zrównoleglenie wykoniania poszczególnych kroków.
 ```
 
 ### SQLite
@@ -309,12 +324,14 @@ Funkcja okna\
 ![w:700](_img/4postgre3.jpg)
 
 ```
-Ponownie, korzystając z PostgreSQL otrzymaliśmy najprostszy plan wykonania dla funkcji okna.
+Ponownie, korzystając z PostgreSQL otrzymaliśmy najprostszy plan wykonania dla funkcji okna, dla podzapytania i joina 
+wykonywane były dodatkowe pełne skany tabeli (łącznie trzy dla podzapytania i dwa dla joina)
 ```
 
 ```
 Łatwo zauważyć, że plany wykonania w MSSQL są zdecydowanie najbardziej skomplikowane, z dużą ilością wykonywanych kroków.
 Pod względem czasów wykonania, ponownie nie jesteśmy w stanie wykonać sensownego porównania, poprzez zbyt małą ilość danych w tabeli.
+W MSSQL i PostgreSQL zapytania ponownie trwały około 100ms, w SQLite średnio mniej - 60ms
 ```
 
 ---
@@ -445,7 +462,7 @@ Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 select p.id, p.productId, p.productName, p.unitPrice,
        (select avg(unitprice) from product_history where CategoryID = p.CategoryID) as avgPrice
 from product_history p
-where p.unitPrice > (select avg(unitprice) from products where CategoryID = p.CategoryID);
+where p.unitPrice > (select avg(unitprice) from product_history where CategoryID = p.CategoryID);
 
 -- join
 with av as (
@@ -468,6 +485,50 @@ select * from av
 where unitPrice > avgPrice;
 ```
 
+![w:700](_img/6query.jpg)
+
+### MSSQL
+
+Podzapytanie\
+![w:700](_img/6mssql1.jpg)
+Join\
+![w:700](_img/6mssql2.jpg)
+Funkcja okna\
+![w:700](_img/6mssql3.jpg)
+
+```
+Plany wykonania wyglądają podobnie jak w zadaniu 4-tym. Kolejno dla podzapytania, joina i funkcji okna wykonuje się 
+coraz mniej kroków, a plan wykonania jest coraz prostszy. Ilość full index scanów maleje od 3 do 1.
+```
+
+### SQLite
+
+Podzapytanie\
+![w:700](_img/6sqlite1.jpg)
+Join\
+![w:700](_img/6sqlite2.jpg)
+Funkcja okna\
+![w:700](_img/6sqlite3.jpg)
+
+```
+Plany wykonania wyglądają podobnie jak w zadaniu 4-tym. Ponownie widoczne wskazania na podzapytania w pierwszym przypadku
+```
+
+### PostgreSQL
+
+Podzapytanie\
+![w:700](_img/6postgre1.jpg)
+Join\
+![w:700](_img/6postgre2.jpg)
+Funkcja okna\
+![w:700](_img/6postgre3.jpg)
+
+```
+Plany wykonania wyglądają podobnie jak w zadaniu 4-tym. Łatwo zauważyć wykonanie dwóch pełnych skanów dla joina a jednego dla funkcji okna.
+Plan wykonania dla podzapytania wygląda na najprostszy, jednakże możemy zauważyć ogromne koszty w agregacjach, co z pewnością
+wpłynęło na czas wykonania.
+```
+
 ```
 MSSQL
 Podzapytanie - wyniki przyrostowe (100 wierszy co ok. 500 milisekund)
@@ -483,6 +544,8 @@ PostgreSQL
 Podzapytanie - za długo aby ocenić
 Join - wyniki przyrostowe (100 wierszy co ok. 160 milisekund)
 Funkcja okna - wyniki przyrostowe (100 wierszy co ok. 400 milisekund)
+
+MSSQL jest w stanie zoptymalizować zapytanie z użyciem podzapytania, w pozostałych SZBD zauważalna przewaga joina i funkcji okna.
 ```
 
 ---
@@ -506,6 +569,7 @@ Porównaj czasy oraz plany wykonania zapytań.
 
 Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 
+### MSSQL
 ```sql
 -- podzapytanie
 select p.id, p.productId, p.productName, p.unitPrice,
@@ -518,8 +582,8 @@ from product_history p;
 with av1 as (select p.categoryId, avg(unitprice) avgCatPrice, sum(value) totalValue
              from product_history p
              group by p.categoryId
-)
-with av2 as (
+),
+av2 as (
     select p.productId, year(p.date) year, avg(unitprice) avgYearPrice
     from product_history p
     group by p.productId, year(p.date)
@@ -538,11 +602,118 @@ from product_history p
 window w as (partition by p.categoryId);
 ```
 
+Podzapytanie\
+![w:700](_img/7mssql1.jpg)
+Join\
+![w:700](_img/7mssql2.jpg)
+Funkcja okna\
+![w:700](_img/7mssql3.jpg)
+
+```
+Dla joina widzimy zrównoleglone kroki z łącznie trzema pełnymi skanami tabeli. W przypadku funkcji okna wszystkie kroki 
+wykonują się sekwencyjnie i potrzebny jest tylko jeden pełny skan.
+Dla podzapytania widoczne cztery pełne skany i zagnieżdżone pętle, co z pewnością miało wpływ na czas wykonania.
+```
+
+### SQLite
+```sql
+-- podzapytanie
+select p.id, p.productId, p.productName, p.unitPrice,
+    (select avg(unitprice) from product_history where categoryId = p.categoryId) as avgCatPrice,
+    (select sum(value) from product_history where categoryid = p.categoryId) as totalValue,
+    (select avg(unitprice) from product_history where productId = p.productId and strftime('%Y', date) = strftime('%Y', p.date)) as avgYearPrice
+from product_history p;
+
+-- join
+with av1 as (select p.categoryId, avg(unitprice) avgCatPrice, sum(value) totalValue
+             from product_history p
+             group by p.categoryId
+),
+av2 as (
+    select p.productId, strftime('%Y', p.date) year, avg(unitprice) avgYearPrice
+    from product_history p
+    group by p.productId, strftime('%Y', p.date)
+)
+select p.id, p.productId, p.productName, p.unitPrice, av1.avgCatPrice, av1.totalValue, av2.avgYearPrice
+from product_history p
+inner join av1 on p.CategoryID = av1.CategoryID
+inner join av2 on p.productId = av2.productId and strftime('%Y', p.date) = av2.year;
+
+-- funkcja okna
+select p.id, p.productId, p.productName, p.unitPrice,
+    avg(unitprice) over w as avgCatPrice,
+    sum(value) over w as totalValue,
+    avg(unitprice) over (partition by p.productId, strftime('%Y', p.date)) as avgYearPrice
+from product_history p
+window w as (partition by p.categoryId);
+```
+
+Podzapytanie\
+![w:700](_img/7sqlite1.jpg)
+Join\
+![w:700](_img/7sqlite2.jpg)
+Funkcja okna\
+![w:700](_img/7sqlite3.jpg)
+
+```
+W podzapytaniu mamy widoczne wywołania podzapytań, w przypadku joina widzimy dużo równoległych kroków, a dla funkcji okna 
+plan jest wizualnie czymś pomiędzy podzapytaniem a joinem. Z powodu ubogiego opisu ciężko wywnioskować wiele z tych planów.
+```
+
+### PostgreSQL
+```sql
+-- podzapytanie
+select p.id, p.productId, p.productName, p.unitPrice,
+    (select avg(unitprice) from product_history where categoryId = p.categoryId) as avgCatPrice,
+    (select sum(value) from product_history where categoryid = p.categoryId) as totalValue,
+    (select avg(unitprice) from product_history where productId = p.productId and extract('Year' from date) = extract('Year' from p.date)) as avgYearPrice
+from product_history p;
+
+-- join
+with av1 as (select p.categoryId, avg(unitprice) as avgCatPrice, sum(value) totalValue
+             from product_history p
+             group by p.categoryId
+),
+av2 as (
+    select p.productId, extract('Year' from p.date) as year, avg(unitprice) avgYearPrice
+    from product_history p
+    group by p.productId, extract('Year' from p.date)
+)
+select p.id, p.productId, p.productName, p.unitPrice, av1.avgCatPrice, av1.totalValue, av2.avgYearPrice
+from product_history p
+inner join av1 on p.CategoryID = av1.CategoryID
+inner join av2 on p.productId = av2.productId and extract('Year' from p.date) = av2.year;
+
+-- funkcja okna
+select p.id, p.productId, p.productName, p.unitPrice,
+    avg(unitprice) over w as avgCatPrice,
+    sum(value) over w as totalValue,
+    avg(unitprice) over (partition by p.productId, extract('Year' from p.date)) as avgYearPrice
+from product_history p
+window w as (partition by p.categoryId);
+```
+
+Podzapytanie\
+![w:700](_img/7postgre1.jpg)
+Join\
+![w:700](_img/7postgre2.jpg)
+Funkcja okna\
+![w:700](_img/7postgre3.jpg)
+
+```
+Dla joina widzimy zrównoleglone kroki z łącznie trzema pełnymi skanami tabeli. W przypadku funkcji okna wszystkie kroki 
+wykonują się sekwencyjnie i potrzebny jest tylko jeden pełny skan.
+Dla podzapytanbia łącznie cztery pełne skany i bardzo kosztowne agregacje.
+Charakterystyka planów bardzo podobna do tych z MSSQL.
+```
+
+![w:700](_img/7query.jpg)
+
 ```
 MSSQL
 Podzapytanie - za długo aby ocenić
 Join - wyniki przyrostowe (100 wierszy co ok. 3 sekundy)
-Funkcja okna - did't work at all
+Funkcja okna - podobny rezultat jak dla joina
 
 SQLite
 Podzapytanie - za długo aby ocenić
@@ -551,7 +722,7 @@ Funkcja okna - wyniki przyrostowe (100 wierszy co ok. 650 milisekund)
 
 PostgreSQL
 Podzapytanie - za długo aby ocenić
-Join - did't work at all
+Join - wyniki przyrostowe (100 wierszy co ok. 300 milisekund)
 Funkcja okna - wyniki przyrostowe (100 wierszy co ok. 800 milisekund)
 ```
 
@@ -570,6 +741,8 @@ select productid, productname, unitprice, categoryid,
     dense_rank() over(partition by categoryid order by unitprice desc) as denserankprice
 from products;
 ```
+
+![w:700](_img/8query.jpg)
 
 ```
 row_number() - unikalny numer dla kazdego w partycji
@@ -592,7 +765,7 @@ select p.productid, p.productname, p.unitprice, p.categoryid,
     (select count(distinct UnitPrice) from products
         where p.categoryId = CategoryID and p.UnitPrice < UnitPrice) + 1 as denserankprice
 from products p
-order by p.CategoryID, p.UnitPrice desc, p.ProductID;
+order by p.CategoryID, p.UnitPrice desc;
 ```
 
 ---
@@ -612,7 +785,11 @@ Dla każdego produktu, podaj 4 najwyższe ceny tego produktu w danym roku. Zbió
 
 Uporządkuj wynik wg roku, nr produktu, pozycji w rankingu
 
+Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czasy i plany zapytań. Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
+
+### MSSQL
 ```sql
+--- funkcja okna
 with r as (
     select year(date) as year, productid, productname, unitprice, date,
         rank() over (partition by productid, year(date) order by unitprice desc) as rankprice
@@ -621,11 +798,8 @@ with r as (
 select * from r
 where rankprice <= 4
 order by year, productid, rankprice;
-```
 
-Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czasy i plany zapytań. Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
-
-```sql
+--- podzapytanie
 with r as (
     select year(p.date) as year, p.productid, p.productname, p.unitprice, p.date,
         (select count(*) from product_history
@@ -639,41 +813,93 @@ where rankprice <= 4
 order by year, productid, rankprice;
 ```
 
-```
-MSSQL
-z over - wyniki przyrostowe (500 wierszy 450 milisekund)
-```
-
+Funkcja okna\
 ![w:700](_img/9mssql1.jpg)
+Podzapytanie\
+![w:700](_img/9mssql2.jpg)
 
 ```
-bez over - za długo
+Sekwencyjny plan wykonania dla funkcji okna, dla podzapytania zagnieżdżone pętle i dodatkowy skan tabeli
+funkcja okna - wyniki przyrostowe (500 wierszy 450 milisekund)
+podzapytanie - za długo
 ```
 
+### SQLite
+```sql
+--- funkcja okna
+with r as (
+    select strftime('%Y', date) as year, productid, productname, unitprice, date,
+        rank() over (partition by productid, strftime('%Y', date) order by unitprice desc) as rankprice
+    from product_history
+)
+select * from r
+where rankprice <= 4
+order by year, productid, rankprice;
+
+--- podzapytanie
+with r as (
+    select strftime('%Y', p.date) as year, p.productid, p.productname, p.unitprice, p.date,
+        (select count(*) from product_history
+            where strftime('%Y', date) = strftime('%Y', p.date)
+                and productid = p.productid
+                and (unitprice > p.unitprice)) + 1 as rankprice
+from product_history p
+)
+select * from r
+where rankprice <= 4
+order by year, productid, rankprice;
 ```
 
-SQLite
-z over - wyniki przyrostowe (500 wierszy 1870 milisekund)
-
-```
-
+Funkcja okna\
 ![w:700](_img/9sqlite1.jpg)
+Podzapytanie\
+![w:700](_img/9sqlite2.jpg)
 
 ```
-bez over - za długo
+Widoczne wykonania podzapytań dla planu z podzapytaniem, ciężko coś sensownego wywnioskować.
+funkcja okna - wyniki przyrostowe (500 wierszy 1870 milisekund)
+podzapytanie - za długo
 ```
 
+### PostgreSQL
+```sql
+--- funkcja okna
+with r as (
+    select extract('Year' from date) as year, productid, productname, unitprice, date,
+        rank() over (partition by productid, extract('Year' from date) order by unitprice desc) as rankprice
+    from product_history
+)
+select * from r
+where rankprice <= 4
+order by year, productid, rankprice;
+
+--- podzapytanie
+with r as (
+    select extract('Year' from p.date) as year, p.productid, p.productname, p.unitprice, p.date,
+        (select count(*) from product_history
+            where extract('Year' from date) = extract('Year' from p.date)
+                and productid = p.productid
+                and (unitprice > p.unitprice)) + 1 as rankprice
+from product_history p
+)
+select * from r
+where rankprice <= 4
+order by year, productid, rankprice;
 ```
 
-PostgreSQL
-z over - wyniki przyrostowe (500 wierszy 9 sekund)
-```
-
+Funkcja okna\
 ![w:700](_img/9postgre1.jpg)
+Podzapytanie\
+![w:700](_img/9postgre2.jpg)
 
 ```
-bez over - za długo
+Dla funkcji okna sekwencyjny plan wykonania, dla podzapytania kosztowne agregacje.
+funkcja okna - wyniki przyrostowe (500 wierszy 9 sekund)
+podzapytanie - za długo
+```
 
+```
+Miażdżaca przewaga funkcji okna nad podzapytaniem, dla każdego z trzech SZBD
 ```
 
 ---
@@ -706,8 +932,11 @@ where productid = 1 and year(date) = 2022
 order by date;
 ```
 
+![w:700](_img/10query1.jpg)
+![w:700](_img/10query2.jpg)
+
 ```
-Drugie zapytanie działa lepiej, jednak jego wykonanie zajmuje dwa razy więcej czasu
+Drugie zapytanie działa podaje wartość poprzednią dla pierwszego rekordu, jednak jego wykonanie zajmuje dwa razy więcej czasu
 1. 140 milisekund
 2. 290 milisekund
 ```
@@ -764,10 +993,32 @@ MSSQL
 SQLite
 ```
 
+```sql
+select p.productid, p.productname, p.categoryid, p.date, p.unitprice,
+   (select unitprice from product_history
+        where productid = p.productid and date = date(p.date, '-1 day')) as previousprodprice,
+   (select unitprice from product_history
+        where productid = p.productid and date = date(p.date, '+1 day')) as nextprodprice
+from product_history p
+where productid = 1 and strftime('%Y', date) = 2022
+order by date;
+```
+
 ![w:700](_img/10sqlite2.jpg)
 
 ```
 PostgreSQL
+```
+
+```sql
+select p.productid, p.productname, p.categoryid, p.date, p.unitprice,
+   (select unitprice from product_history
+        where productid = p.productid and date = p.date - interval '1 day') as previousprodprice,
+   (select unitprice from product_history
+        where productid = p.productid and date = p.date + interval '1 day') as nextprodprice
+from product_history p
+where productid = 1 and extract('Year' from date) = 2022
+order by date;
 ```
 
 ![w:700](_img/10postgre2.jpg)
@@ -806,6 +1057,8 @@ inner join Customers c on o.CustomerID = c.CustomerID
 group by c.CompanyName, o.OrderID, o.OrderDate, o.Freight
 ```
 
+![w:700](_img/11query.jpg)
+
 ---
 
 # Zadanie 12 - obserwacja
@@ -824,6 +1077,8 @@ from products
 order by categoryid, unitprice desc;
 ```
 
+![w:700](_img/12query1.jpg)
+
 ```sql
 select productid, productname, unitprice, categoryid,
     first_value(productname) over (partition by categoryid
@@ -834,10 +1089,18 @@ from products
 order by categoryid, unitprice desc;
 ```
 
+```
+W pierwszym przypadku funkcja last_value daje najmniejszy wynik w zakresie od początku do aktualnego wiersza, co jest standardowym
+zachowaniem tej funkcji, aby dostać wartość globalną należy dodać warunek RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+```
+
+![w:700](_img/12query2.jpg)
+
 Zadanie
 
 Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czasy i plany zapytań. Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 
+### MSSQL
 ```sql
 select p.productid, p.productname, p.unitprice, p.categoryid,
     (select top 1 productname from Products where p.CategoryID = CategoryID order by UnitPrice desc) as first,
@@ -847,17 +1110,25 @@ order by p.categoryid, p.unitprice desc;
 ```
 
 ```
-MSSQL
-z over - 100 milisekund
+funkcja okna - 100 milisekund
 ```
 
 ![w:700](_img/12mssql1.jpg)
 
 ```
-bez over - 100 milisekund
+podzapytanie - 100 milisekund
 ```
 
 ![w:700](_img/12mssql2.jpg)
+
+### SQLite / PostgreSQL
+```sql
+select p.productid, p.productname, p.unitprice, p.categoryid,
+    (select productname from Products where p.CategoryID = CategoryID order by UnitPrice desc limit 1) as first,
+    (select productname from Products where p.CategoryID = CategoryID order by UnitPrice limit 1) as last
+from products p
+order by p.categoryid, p.unitprice desc;
+```
 
 ```
 W przypadku tak małego zapytania cięzko zobaczyć róznicę w czasie
@@ -902,6 +1173,8 @@ select *,
 from r
 ```
 
+![w:700](_img/13query.jpg)
+
 ---
 
 # Zadanie 14
@@ -924,6 +1197,8 @@ select ph.id, ph.productid, ph.date, ph.value,
 from product_history ph
 order by ph.productid, ph.date;
 ```
+
+![w:700](_img/14query1.jpg)
 
 Spróbuj wykonać zadanie bez użycia funkcji okna. Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czasy i plany zapytań. Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 
