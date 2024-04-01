@@ -51,7 +51,7 @@ Oprogramowanie dostępne jest na przygotowanej maszynie wirtualnej
 
 ## Przygotowanie  
 
-Uruchom Microsoft SQL Managment Studio.
+Uruchom Microsoft SQL Managment Studio. 
     
 Stwórz swoją bazę danych o nazwie XYZ. 
 
