@@ -146,12 +146,40 @@ Teraz wykonaj poszczególne zapytania (najlepiej każde analizuj oddzielnie). Co
 (Hint: aby wykonać tylko fragment kodu SQL znajdującego się w edytorze, zaznacz go i naciśnij F5)
 
 ---
-> Wyniki: 
+Wyniki: 
 
-```sql
---  ...
-```
+**Zapytanie 1**
 
+![w:700](_img/1-1-1.png)
+![w:700](_img/1-1-2.png)
+
+Zapytanie sprawdza zamówienia z 1 czerwca 2008 roku. Zbiór wynikowy jest pusty.
+Można je zoptymalizować dodając indeks na kolumnę `OrderDate` w tabeli `salesorderheader`.
+
+**Zapytanie 2**
+
+![w:700](_img/1-2-1.png)
+![w:700](_img/1-2-2.png)
+
+Zapytanie grupuje zamówienia po dacie i produktach, sumując ilość zamówionych produktów, rabat oraz łączną wartość zamówienia. 
+Można je zoptymalizować dodając indeks na kolumny `OrderQty`, `ProductID`, `UnitPriceDiscount` i `LineTotal` w tabeli `salesorderdetail`.
+
+**Zapytanie 3**
+
+![w:700](_img/1-3-1.png)
+![w:700](_img/1-3-2.png)
+
+Zapytanie sprawdza zamówienia z 1-5 czerwca 2008 roku. Zbiór wynikowy jest pusty.
+Można je zoptymalizować dodając indeks na kolumnę `OrderDate` w tabeli `salesorderheader`.
+
+**Zapytanie 4**
+
+![w:700](_img/1-4-1.png)
+![w:700](_img/1-4-2.png)
+
+Zapytanie sprawdza zamówienia z numerami przewozowymi `ef67-4713-bd` i `6c08-4c4c-b8`.
+Można je zoptymalizować dodając indeks na kolumnę `CarrierTrackingNumber` w tabeli `salesorderdetail`.
+Otrzymujemy zduplikowane wyniki - można uzyskać czytelniejsze wyniki dodając `DISTINCT` do zapytania.
 ---
 
 
@@ -172,11 +200,24 @@ Zaznacz wszystkie zapytania, i uruchom je w **Database Engine Tuning Advisor**:
 Sprawdź zakładkę **Tuning Options**, co tam można skonfigurować?
 
 ---
-> Wyniki: 
 
-```sql
---  ...
-```
+![w:700](_img/2-1-1.png)
+![w:700](_img/2-1-2.png)
+
+Można skonfigurować:
+* Czas wykonywania się tuningu/dostrajania. Można wybrać dzień i czas zakończenia procesu.
+* Fizyczne struktury dla indeksów - można wybrać, czy indeksy, indeksowane widoki, indeksy niezgrupowane. Możemy także 
+zaznaczyć czy chcemy otrzymać w rekomendacji także indeksy filtrowane i mieć rekomendowane indeksy kolumnowe. Również
+możemy poprosić o wykorzystanie tylko istniejących struktur dla analizy.
+* Wybór strategii partycjonowania - możemy wybrać brak partycjonowania, pełne partycjonowanie lub wyrównane partyconowanie
+* Wybór jakie fizyczne struktury chcemy zachować w bazie danych - do wyboru: żadne, wszystkie, tylko indeksy,
+tylko indeksy klastrowane, tylko wyrównane partycjonowanie.
+
+Dodatkowo mamy opcje zaawansowane:
+* Wybór maksymalnej przestrzeni dla rekomendacji
+* Możliwość uwzględnienia zdarzeń z bufora planów z wszystkich baz danych
+* Wybór maksymalnej liczby kolumn na indeks
+* Możliwość korzystania z bazy danych w trakcie analizy.
 
 ---
 
@@ -200,28 +241,122 @@ Przejdź do zakładki **Reports**. Sprawdź poszczególne raporty. Główną uwa
 
 Zapisz poszczególne rekomendacje:
 
+---
+```sql
+SET ANSI_PADDING ON
+
+CREATE NONCLUSTERED INDEX [_dta_index_salesorderdetail_6_917578307__K3_1] ON [dbo].[salesorderdetail]
+(
+	[CarrierTrackingNumber] ASC
+)
+INCLUDE([SalesOrderID]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+
+
+CREATE NONCLUSTERED INDEX [_dta_index_salesorderdetail_6_917578307__K1_K5_4_8_9] 
+       ON [dbo].[salesorderdetail]
+(
+	[SalesOrderID] ASC,
+	[ProductID] ASC
+)
+INCLUDE([OrderQty],[UnitPriceDiscount],[LineTotal]) 
+       WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) 
+       ON [PRIMARY]
+
+
+CREATE NONCLUSTERED INDEX [_dta_index_salesorderdetail_6_917578307__K1_2_3_4_5_6_7_8_9_10_11] 
+       ON [dbo].[salesorderdetail]
+(
+	[SalesOrderID] ASC
+)
+INCLUDE([SalesOrderDetailID],[CarrierTrackingNumber],[OrderQty],[ProductID],[SpecialOfferID],
+       [UnitPrice],[UnitPriceDiscount],[LineTotal],[rowguid],[ModifiedDate]) 
+       WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+
+
+CREATE STATISTICS [_dta_stat_917578307_1_3] ON [dbo].[salesorderdetail]([SalesOrderID], 
+       [CarrierTrackingNumber])
+WITH AUTO_DROP = OFF
+
+
+CREATE NONCLUSTERED INDEX [_dta_index_salesorderheader_6_901578250__K3_1] ON [dbo].[salesorderheader]
+(
+	[OrderDate] ASC
+)
+INCLUDE([SalesOrderID]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+
+
+CREATE NONCLUSTERED INDEX [_dta_index_salesorderheader_6_901578250__K1_4_5_8_9] 
+       ON [dbo].[salesorderheader]
+(
+	[SalesOrderID] ASC
+)
+INCLUDE([DueDate],[ShipDate],[SalesOrderNumber],[PurchaseOrderNumber]) 
+       WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+
+
+CREATE NONCLUSTERED INDEX 
+       [_dta_index_salesorderheader_6_901578250__K3_K1_2_4_5_6_7_8_9_10_11_12_13_14_15_16_17_18_19_20
+       _21_22_23_24_25_26] 
+       ON [dbo].[salesorderheader]
+(
+	[OrderDate] ASC,
+	[SalesOrderID] ASC
+)
+INCLUDE([RevisionNumber],[DueDate],[ShipDate],[Status],[OnlineOrderFlag],[SalesOrderNumber],
+       [PurchaseOrderNumber],[AccountNumber],[CustomerID],[SalesPersonID],[TerritoryID],
+       [BillToAddressID],[ShipToAddressID],[ShipMethodID],[CreditCardID],
+       [CreditCardApprovalCode],[CurrencyRateID],[SubTotal],[TaxAmt],[Freight],[TotalDue],
+       [Comment],[rowguid],[ModifiedDate]) 
+       WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+
+
+CREATE STATISTICS [_dta_stat_901578250_1_3] ON [dbo].[salesorderheader]([SalesOrderID], [OrderDate])
+WITH AUTO_DROP = OFF
+```
+
 Uruchom zapisany skrypt w Management Studio.
 
 Opisz, dlaczego dane indeksy zostały zaproponowane do zapytań:
 
 ---
-> Wyniki: 
 
-```sql
---  ...
-```
+Takie indeksy zostały zaproponowane, ponieważ w wykonywach zapytaniach były wykorzystywane te kolumny w połączeniu 
+ze sobą. Dodatkowo system zaproponował dodanie indeksów na kilka innych kolumn, które potencjalnie pomogłyby w 
+optymalizacji podobnych zapytań.
 
 ---
-
 
 Sprawdź jak zmieniły się Execution Plany. Opisz zmiany:
 
 ---
-> Wyniki: 
 
-```sql
---  ...
-```
+**Zapytanie 1**
+
+![w:700](_img/1-1-2.png)
+![w:700](_img/2-3-1.png)
+
+Zamiast skanowania całych tabel, system wykorzystuje indeksy oraz nie wykonuje hash joina, a zamiast tego korzysta z nested loop joina.
+
+**Zapytanie 2**
+
+![w:700](_img/1-2-2.png)
+![w:700](_img/2-3-2.png)
+
+Ponownie zamiast skanować całe tabele, system korzysta z indeksów.
+
+**Zapytanie 3**
+
+![w:700](_img/1-3-2.png)
+![w:700](_img/2-3-3.png)
+
+Zmiany takie same jak przy pierwszym zapytaniu.
+
+**Zapytanie 4**
+
+![w:700](_img/1-4-2.png)
+![w:700](_img/2-3-4.png)
+
+Zmiany takie same jak przy pierwszym zapytaniu. Dodatkowo, system sortuje wyniki z `salesorderdetail` przed wykonaniem joina.
 
 ---
 
@@ -254,11 +389,15 @@ from sys.dm_db_index_physical_stats (db_id('adventureworks2017')
 Jakie są według Ciebie najważniejsze pola?
 
 ---
-> Wyniki: 
 
-```sql
---  ...
-```
+Najważniejszymi polami wydają się być:
+* `avg_fragmentation_in_percent` - procent fragmentacji indeksu (im mniejszy tym lepiej), wartości znacznie wyższe niż 0 
+oznaczają, że indeks wymaga reorganizacji lub przebudowy, ponieważ zbyt dużo danych jest w niepoprawnej kolejności, 
+co wpływa na wydajność zapytań. Dokumentacja mówi, że wartości do 10% są akceptowalne.
+* `avg_page_space_used_in_percent` - procent wykorzystania strony indeksu (im większy tym lepiej), wartości zbyt niskie 
+oznaczają, że indeks zajmuje zbyt dużo miejsca na dysku, co wpływa na wydajność zapytań, dla indeksów bez losowych 
+wstawek wartość powinna być bliska 100%. W drugim przypadku, wartość powinna być mniejsza niż 100%, aby zredukować ilość
+podziałów stron.
 
 ---
 
@@ -287,12 +426,8 @@ and index_id not in (0) --only clustered and nonclustered indexes
 
 
 ---
-> Wyniki: 
-> zrzut ekranu/komentarz:
 
-```sql
---  ...
-```
+![w:700](_img/3-1.png)
 
 ---
 
@@ -317,12 +452,8 @@ and index_id not in (0) --only clustered and nonclustered indexes
 ```
 
 ---
-> Wyniki: 
-> zrzut ekranu/komentarz:
 
-```sql
---  ...
-```
+![w:700](_img/3-2.png)
 
 ---
 
@@ -331,22 +462,30 @@ Czym się różni przebudowa indeksu od reorganizacji?
 (Podpowiedź: [http://blog.plik.pl/2014/12/defragmentacja-indeksow-ms-sql.html](http://blog.plik.pl/2014/12/defragmentacja-indeksow-ms-sql.html))
 
 ---
-> Wyniki: 
 
-```sql
---  ...
-```
+Przebudowa indeksu polega na usunięciu indeksu i jego ponownym utworzeniu. W wyniku tego procesu struktura indeksu jest
+odświeżana, a indeks jest ponownie tworzony od zera. Przebudowa indeksu jest bardziej kosztowna niż reorganizacja, ale
+pozwala na uzyskanie lepszych wyników. Może być wykonywana online lub offline.
+
+Reorganizacja indeksu polega na przesuwaniu danych wewnątrz indeksu, co pozwala na usunięcie fragmentacji indeksu. Proces 
+ten jest mniej kosztowny niż przebudowa, ale nie zawsze daje tak dobre rezultaty. Jest wykonywana online.
 
 ---
 
 Sprawdź co przechowuje tabela sys.dm_db_index_usage_stats:
 
 ---
-> Wyniki: 
+
 
 ```sql
---  ...
+select * from sys.dm_db_index_usage_stats
 ```
+
+![w:700](_img/3-3.png)
+
+Tabela przechowuje informacje o użyciu indeksów w bazie danych. Możemy z niej odczytać informacje o wykorzystaniu indeksów,
+ostatnim czasie ich użycia, ilości skanów, ilości odczytów, ilości zapisów, ilości aktualizacji, ilości poszukiwań. Dzięki 
+temu możemy ocenić, które indeksy są używane, a które nie, co pozwala na optymalizację bazy danych.
 
 ---
 
@@ -388,10 +527,13 @@ on sc.schema_id = ob.schema_id
 Napisz przygotowane komendy SQL do naprawy indeksów:
 
 ---
-> Wyniki: 
+
+![w:700](_img/3-4.png)
 
 ```sql
---  ...
+alter index XMLPATH_Person_Demographics on Person.Person rebuild
+alter index XMLPROPERTY_Person_Demographics on Person.Person rebuild
+alter index XMLVALUE_Person_Demographics on Person.Person rebuild
 ```
 
 ---
@@ -417,11 +559,19 @@ dbcc ind ('adventureworks2017', 'person.address', 1)
 Zapisz sobie kilka różnych typów stron, dla różnych indeksów:
 
 ---
-> Wyniki: 
 
-```sql
---  ...
-```
+**Indeks 1**
+![w:700](_img/4-1-1.png)
+**Indeks 2**
+![w:700](_img/4-1-2.png)
+**Indeks 3**
+![w:700](_img/4-1-3.png)
+
+Typy stron:
+* 1 - strona danych
+* 2 - strona indeksu
+* 3 - strona tekstów
+* 10 - sam indeks
 
 ---
 
@@ -441,11 +591,40 @@ dbcc page('adventureworks2017', 1, 13720, 3);
 Zapisz obserwacje ze stron. Co ciekawego udało się zaobserwować?
 
 ---
-> Wyniki: 
 
+**Typ 1**
 ```sql
---  ...
+dbcc page('adventureworks2017', 1, 11843, 3);
 ```
+![w:700](_img/4-2-1.png)
+
+**Typ 2**
+```sql
+dbcc page('adventureworks2017', 1, 5889, 3);
+```
+![w:700](_img/4-2-2.png)
+
+**Typ 3**
+```sql
+dbcc page('adventureworks2017', 1, 11704, 3);
+```
+![w:700](_img/4-2-3.png)
+
+**Typ 10**
+```sql
+dbcc page('adventureworks2017', 1, 10473, 3);
+```
+![w:700](_img/4-2-4.png)
+
+Otrzymujemy informacje o stronie oraz dane o buforze. Dowiadujemy się jak strona jest przechowywana w pamięci, jej adres, 
+statystyki odczytu/zapisu stan błędu. 
+
+Widoczny jest nagłówek strony, który zawiera informacje o typie strony, numerze strony, wersję nagłówka, flagi, informacje 
+o poprzedniej i następnej stronie, o obiekcie,
+
+Możemy zaobserwować także status alokacji, dający informacje o alokacji miejsca w różnych strukturach bazy danych.
+
+Dalej mamy dostęp do surowych danych przechowywanych na danej stronie.
 
 ---
 
