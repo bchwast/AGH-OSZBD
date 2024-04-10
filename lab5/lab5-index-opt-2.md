@@ -242,7 +242,10 @@ order by rejectedqty desc, productid asc
 ```
 
 ---
->![w:700](_img/t3_no_id.jpg)
+>Wynik
+![w:700](_img/t3_no_id_res.jpg)
+Plan
+![w:700](_img/t3_no_id_plan.jpg)
 Zapytanie składa się z pełnego skanu tabeli i posortowania danych.
 ---
 
@@ -265,7 +268,10 @@ Jaki indeks można zastosować aby zoptymalizować koszt zapytania? Przygotuj po
  Ponownie wykonaj analizę zapytania:
 
 ---
->![w:700](_img/t3_with_id.jpg)
+>Wynik
+![w:700](_img/t3_with_id_res.jpg)
+Plan
+![w:700](_img/t3_with_id_plan.jpg)
 Operacje **Sort** i **Full Scan** zostały zastąpione przez **Full Index Scan**, zredukowało to koszt zapytania do 0.0406.
 ---
 
