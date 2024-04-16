@@ -93,6 +93,12 @@ from product
 where productsubcategoryid >= 27 and productsubcategoryid <= 36
 ```
 
+---
+>![w:700](_img/1-1-1.png)
+![w:700](_img/1-1-2.png)\
+Indeks został użyty w zapytaniu
+---
+
 Sprawdź, czy indeks jest użyty w zapytaniu, który jest dopełnieniem zbioru:
 
 ```sql
@@ -101,18 +107,20 @@ from product
 where productsubcategoryid < 27 or productsubcategoryid > 36
 ```
 
+---
+>![w:700](_img/1-2-1.png)
+![w:700](_img/1-2-2.png)\
+Indeks nie został użyty w zapytaniu
+---
 
 Skomentuj oba zapytania. Czy indeks został użyty w którymś zapytaniu, dlaczego? Czy indeks nie został użyty w którymś zapytaniu, dlaczego? Jak działają indeksy z warunkiem?
 
-
 ---
-> Wyniki: 
-
-```sql
---  ...
-```
-
-
+> Indeks został użyty tylko w pierwszym zapytaniu, ponieważ został on założony tylko na wybranych wierszach. 
+W drugim zapytaniu wybieramy wiersze z poza zakresu z warunku indeksu, więc indeks nie jest używany.
+Indeksy z warunkiem dotyczą tylko wierszy spełniający zadany predykat, takie indeksy zajmują mniej miejsca na dysku 
+i są prostsze w utrzymaniu. Wykorzystywane są do optymalizowania zapytania o konkretny podzbiór wierszy z tabeli.
+---
 
 # Zadanie 2 – indeksy klastrujące
 
@@ -128,9 +136,14 @@ select * into salesorderheader2 from adventureworks2017.sales.salesorderheader
 Wypisz sto pierwszych zamówień:
 
 ```sql
-select top 1000 * from salesorderheader2  
+select top 100 * from salesorderheader2  
 order by orderdate
 ```
+
+---
+>![w:700](_img/2-1-1.png)
+![w:700](_img/2-1-2.png)
+---
 
 Stwórz indeks klastrujący według OrderDate:
 
@@ -141,12 +154,12 @@ create clustered index order_date2_idx on salesorderheader2(orderdate)
 Wypisz ponownie sto pierwszych zamówień. Co się zmieniło?
 
 ---
-> Wyniki: 
-
-```sql
---  ...
-```
-
+>![w:700](_img/2-2-1.png)
+![w:700](_img/2-2-2.png)
+Zapytanie zwróciło taki sam wynik, natomiast patrząc na plan, można zauważyć brak sortowania danych, ponieważ dzięki
+zastosowaniu indeksu klastrowanego według kolumny *orderdate*, dane zostały przeorganizowane na dysku i są już wyjściowo
+posortowane.
+---
 
 Sprawdź zapytanie:
 
@@ -155,16 +168,22 @@ select top 1000 * from salesorderheader2
 where orderdate between '2010-10-01' and '2011-06-01'
 ```
 
+---
+>![w:700](_img/2-3-1.png)
+![w:700](_img/2-3-2.png)
+---
 
 Dodaj sortowanie według OrderDate ASC i DESC. Czy indeks działa w obu przypadkach. Czy wykonywane jest dodatkowo sortowanie?
 
-
 ---
-> Wyniki: 
-
-```sql
---  ...
-```
+>ASC
+![w:700](_img/2-4-1.png)
+![w:700](_img/2-4-2.png)\
+DESC
+![w:700](_img/2-5-1.png)
+![w:700](_img/2-5-2.png)\
+W obu przypadkach indeks zadziałał, dodatkowe sortowanie nie jest wykonywane.
+---
 
 
 # Zadanie 3 – indeksy column store
@@ -210,6 +229,10 @@ insert into saleshistory
 go 100
 ```
 
+---
+>![w:700](_img/3-1-1.png)
+---
+
 Sprawdź jak zachowa się zapytanie, które używa obecny indeks:
 
 ```sql
@@ -218,6 +241,11 @@ from saleshistory
 group by productid  
 order by productid
 ```
+
+---
+>![w:700](_img/3-2-1.png)
+![w:700](_img/3-2-2.png)
+---
 
 Załóż indeks typu ColumnStore:
 
@@ -228,13 +256,12 @@ create nonclustered columnstore index saleshistory_columnstore
 
 Sprawdź różnicę pomiędzy przetwarzaniem w zależności od indeksów. Porównaj plany i opisz różnicę.
 
-
 ---
-> Wyniki: 
-
-```sql
---  ...
-```
+>![w:700](_img/3-3-1.png)
+![w:700](_img/3-3-2.png)\
+W obu przypadkach zapytanie zwróciło taki sam wynik, natomiast patrząc na plan, można zauważyć, że w przypadku indeksu kolumnowego
+krok **Hash Match** relatywnie był dużo bardziej kosztowny niż w zapytaniu z indeksem klastrowanym.
+---
 
 # Zadanie 4 – własne eksperymenty
 
