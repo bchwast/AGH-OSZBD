@@ -336,6 +336,7 @@ where OrderQty < 200 and ReceivedQty * 0.5 < RejectedQty
 Przy naszej wielkości tabeli wyniki mają rozmiar ponad 22000 wierszy.
 
 Wywołanie bez indeksu
+
 ![w:700](_img/4-1-1.jpg)
 
 Stworzenie indeksu
@@ -347,11 +348,13 @@ where OrderQty < 200
 ```
 
 Zwykłe wywołanie po stworzeniu indeksu
+
 ![w:700](_img/4-1-2.jpg)
 
 Koszt Index skan jest mniejszy niz wcześniej widziany table Scan jednak o wiele większy koszt mamy teraz nałozony na krok Gather Streams.
 
 Wywołanie z wymuszeniem uzycia indeksu
+
 ![w:700](_img/4-1-3.jpg)
 
 Wywołanie po stworzeniu indeksu jest o 60% szybsze niz bez indeksu, gdy wymusimy uzycie indeksu execution plan zmienia się dając o wiele gorsze wyniki.
@@ -366,6 +369,7 @@ create clustered index orderqty_idx_clu
 ```
 
 ![w:700](_img/4-2-1.jpg)
+
 W tym przypadku zwykłe wywołanie zapytania samo z siebie uzywa stworzonego indeksu.
 Czas wywołania jest podobny do tego z indeksem nonclustered.
 Wymuszenie uzycia indeksu daje takie same rezultaty.
@@ -374,6 +378,7 @@ Koszt Gather Streams wrócił do niskiego poziomu jednak Clustered Inex Seek ma 
 ### Part 3
 
 Wywołanie zapytania bez indeksu
+
 ![w:700](_img/4-1-1.jpg)
 
 Stworzenie indeksu nonclustered nonfiltered
@@ -384,9 +389,11 @@ create nonclustered index orderqty_idx_norm
 ```
 
 Wywołanie po stworzeniu indeksu
+
 ![w:700](_img/4-3-1.jpg)
 
 Wywołanie z wymuszeniem indeksu
+
 ![w:700](_img/4-3-2.jpg)
 
 W tym przypadku indeks równiez zostaje uzyty automatycznie, nie musimy go wymuszać, otrzymane wyniki są podobne jak w przypadku indeksu clustered.
