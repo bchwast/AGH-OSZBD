@@ -398,6 +398,7 @@ Wywołanie z wymuszeniem indeksu
 
 W tym przypadku indeks równiez zostaje uzyty automatycznie, nie musimy go wymuszać, otrzymane wyniki są podobne jak w przypadku indeksu clustered.
 Wyniki dostajemy około 60% szybciej, koszt równiez jest nizszy.
+
 | | | | |
 | ------- | --- | --- | --- |
 | zadanie | pkt | | |
