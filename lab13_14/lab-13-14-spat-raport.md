@@ -1,14 +1,14 @@
 # Raport
 
-# Przetwarzanie i analiza danych przestrzennych 
-# Oracle spatial
+# Przetwarzanie i analiza danych przestrzennych
 
+# Oracle spatial
 
 ---
 
 **Imiona i nazwiska:**
 
---- 
+---
 
 Celem ćwiczenia jest zapoznanie się ze sposobem przechowywania, przetwarzania i analizy danych przestrzennych w bazach danych
 (na przykładzie systemu Oracle spatial)
@@ -16,6 +16,7 @@ Celem ćwiczenia jest zapoznanie się ze sposobem przechowywania, przetwarzani
 Swoje odpowiedzi wpisuj w miejsca oznaczone jako:
 
 ---
+
 > Wyniki, zrzut ekranu, komentarz
 
 ```sql
@@ -33,6 +34,7 @@ Raport należy przesłać w formacie pdf.
 Należy też dołączyć raport zawierający kod w formacie źródłowym.
 
 Np.
+
 - plik tekstowy .sql z kodem poleceń
 - plik .md zawierający kod wersji tekstowej
 - notebook programu jupyter – plik .ipynb
@@ -49,63 +51,57 @@ Zwizualizuj przykładowe dane
 
 US_STATES
 
-
 > Wyniki, zrzut ekranu, komentarz
+> ![alt text](img/1.1.jpg)
 
 ```sql
 --  ...
 ```
-
 
 US_INTERSTATES
 
-
 > Wyniki, zrzut ekranu, komentarz
+> ![alt text](img/1.2.jpg)
 
 ```sql
 --  ...
 ```
-
 
 US_CITIES
 
-
 > Wyniki, zrzut ekranu, komentarz
+> ![alt text](img/1.3.jpg)
 
 ```sql
 --  ...
 ```
-
 
 US_RIVERS
 
-
 > Wyniki, zrzut ekranu, komentarz
+> ![alt text](img/1.4.jpg)
 
 ```sql
 --  ...
 ```
-
 
 US_COUNTIES
 
-
 > Wyniki, zrzut ekranu, komentarz
+> ![alt text](img/1.5.jpg)
 
 ```sql
 --  ...
 ```
-
 
 US_PARKS
 
-
 > Wyniki, zrzut ekranu, komentarz
+> ![alt text](img/1.6.jpg)
 
 ```sql
 --  ...
 ```
-
 
 # Zadanie 2
 
@@ -122,14 +118,12 @@ sdo_ordinate_array ( -117.0, 40.0, -90., 44.0)) g
 FROM dual
 ```
 
-
-
 > Wyniki, zrzut ekranu, komentarz
+> ![alt text](img/2.0.jpg)
 
 ```sql
 --  ...
 ```
-
 
 Użyj funkcji SDO_FILTER
 
@@ -144,15 +138,14 @@ sdo_ordinate_array ( -117.0, 40.0, -90., 44.0))
 
 Zwróć uwagę na liczbę zwróconych wierszy (16)
 
-
 > Wyniki, zrzut ekranu, komentarz
+> ![alt text](img/2.1.jpg)
 
 ```sql
 --  ...
 ```
 
-
-Użyj funkcji  SDO_ANYINTERACT
+Użyj funkcji SDO_ANYINTERACT
 
 ```sql
 SELECT state, geom FROM us_states
@@ -167,8 +160,20 @@ Porównaj wyniki sdo_filter i sdo_anyinteract
 
 Pokaż wynik na mapie
 
-
 > Wyniki, zrzut ekranu, komentarz
+> ![alt text](img/2.2.jpg)
+
+```
+na zółto widzimy wystające części wyniku funkcji filter, zielonawy kolor przedstawia wyniki anyinteract
+```
+
+```
+funkcja sdo_anyinteract daje lepsze wyniki, funkcja filter znajduje stany które w ogóle nie dotykają naszego prostokąta.
+
+Dzieje się tak poniewaz funkcja filter robi filtracje na bazie bounding box'u, a nie dokładnej geometrii obiektów.
+Jest to obliczeniowo o wiele lzejszy proces, ale nie da nam idealnych wynikow.
+Potencjalnie najbardziej optymalnym podejsciem wydaje sie najpierw uzycie funkcji filter(bo jest szybka) na całym zbiorze danych, a następnie funkcji anyinteract na wyniku funkcji filter. To pozwoliłoby nam wykonać najmniej obliczeń przy zachowaniu maksymalnej dokładności wyników.
+```
 
 ```sql
 --  ...
@@ -200,28 +205,22 @@ WHERE id IN
 )
 ```
 
-
-
 > Wyniki, zrzut ekranu, komentarz
 
 ```sql
 --  ...
 ```
-
 
 ```sql
 SELECT state, geom FROM us_states
 WHERE state = 'Wyoming'
 ```
 
-
-
 > Wyniki, zrzut ekranu, komentarz
 
 ```sql
 --  ...
 ```
-
 
 Porównaj wynik z:
 
@@ -234,14 +233,11 @@ AND SDO_ANYINTERACT (p.geom, s.geom ) = 'TRUE';
 
 W celu wizualizacji użyj podzapytania
 
-
-
 > Wyniki, zrzut ekranu, komentarz
 
 ```sql
 --  ...
 ```
-
 
 # Zadanie 4
 
@@ -266,8 +262,6 @@ AND SDO_RELATE ( c.geom,s.geom, 'mask=COVEREDBY') = 'TRUE';
 
 W przypadku wykorzystywania narzędzia SQL Developer, w celu wizualizacji danych na mapie należy użyć podzapytania (podobnie jak w poprzednim zadaniu)
 
-
-
 > Wyniki, zrzut ekranu, komentarz
 
 ```sql
@@ -287,25 +281,22 @@ WHERE interstate = 'I4'
 SELECT * FROM us_states
 WHERE state_abrv = 'FL'
 
-SELECT c.city, c.state_abrv, c.location 
+SELECT c.city, c.state_abrv, c.location
 FROM us_cities c
-WHERE ROWID IN 
-( 
+WHERE ROWID IN
+(
 SELECT c.rowid
-FROM us_interstates i, us_cities c 
+FROM us_interstates i, us_cities c
 WHERE i.interstate = 'I4'
 AND sdo_within_distance (c.location, i.geom,'distance=50 unit=mile'
 )
 ```
-
-
 
 > Wyniki, zrzut ekranu, komentarz
 
 ```sql
 --  ...
 ```
-
 
 Dodatkowo:
 
@@ -321,7 +312,6 @@ e)    Znajdz wszystkie miasta w odlegości od 15 do 30 mil od drogi 'I275'
 
 f)      Itp. (własne przykłady)
 
-
 > Wyniki, zrzut ekranu, komentarz
 > (dla każdego z podpunktów)
 
@@ -335,17 +325,16 @@ Znajdz 5 miast najbliższych drogi I4
 
 ```sql
 SELECT c.city, c.state_abrv, c.location
-FROM us_interstates i, us_cities c 
+FROM us_interstates i, us_cities c
 WHERE i.interstate = 'I4'
 AND sdo_nn(c.location, i.geom, 'sdo_num_res=5') = 'TRUE';
 ```
 
->Wyniki, zrzut ekranu, komentarz
+> Wyniki, zrzut ekranu, komentarz
 
 ```sql
 --  ...
 ```
-
 
 Dodatkowo:
 
@@ -361,14 +350,12 @@ e)    Znajdz 5 najbliższych dużych miast (o populacji powyżej 300 tys) od 
 
 f)      Itp. (własne przykłady)
 
-
 > Wyniki, zrzut ekranu, komentarz
 > (dla każdego z podpunktów)
 
 ```sql
 --  ...
 ```
-
 
 # Zadanie 7
 
@@ -380,13 +367,11 @@ FROM us_interstates
 WHERE interstate = 'I4';
 ```
 
-
->Wyniki, zrzut ekranu, komentarz
+> Wyniki, zrzut ekranu, komentarz
 
 ```sql
 --  ...
 ```
-
 
 Dodatkowo:
 
@@ -399,7 +384,6 @@ c)     Która rzeka jest najdłuższa/najkrótsza
 d)    Które stany mają najdłuższą granicę
 
 e)    Itp. (własne przykłady)
-
 
 > Wyniki, zrzut ekranu, komentarz
 > (dla każdego z podpunktów)
@@ -416,9 +400,7 @@ FROM us_cities c1, us_cities c2
 WHERE c1.city = 'Buffalo' and c2.city = 'Syracuse';
 ```
 
-
-
->Wyniki, zrzut ekranu, komentarz
+> Wyniki, zrzut ekranu, komentarz
 
 ```sql
 --  ...
@@ -444,7 +426,6 @@ c.     sdo_centroid, sdo_mbr, sdo_convexhull, sdo_simplify
 
 f)      Itp. (własne przykłady)
 
-
 > Wyniki, zrzut ekranu, komentarz
 > (dla każdego z podpunktów)
 
@@ -452,13 +433,11 @@ f)      Itp. (własne przykłady)
 --  ...
 ```
 
-
 Zadanie 8
 
 Wykonaj kilka własnych przykładów/analiz
 
-
->Wyniki, zrzut ekranu, komentarz
+> Wyniki, zrzut ekranu, komentarz
 
 ```sql
 --  ...
@@ -466,15 +445,15 @@ Wykonaj kilka własnych przykładów/analiz
 
 Punktacja
 
-|   |   |
-|---|---|
-|zad|pkt|
-|1|0,5|
-|2|1|
-|3|1|
-|4|1|
-|5|3|
-|6|3|
-|7|6|
-|8|4|
-|razem|20|
+|       |     |
+| ----- | --- |
+| zad   | pkt |
+| 1     | 0,5 |
+| 2     | 1   |
+| 3     | 1   |
+| 4     | 1   |
+| 5     | 3   |
+| 6     | 3   |
+| 7     | 6   |
+| 8     | 4   |
+| razem | 20  |
