@@ -206,6 +206,7 @@ WHERE id IN
 ```
 
 > Wyniki, zrzut ekranu, komentarz
+> ![alt text](img/3.1.jpg)
 
 ```sql
 --  ...
@@ -217,6 +218,7 @@ WHERE state = 'Wyoming'
 ```
 
 > Wyniki, zrzut ekranu, komentarz
+> ![alt text](img/3.2.jpg)
 
 ```sql
 --  ...
@@ -234,9 +236,21 @@ AND SDO_ANYINTERACT (p.geom, s.geom ) = 'TRUE';
 W celu wizualizacji użyj podzapytania
 
 > Wyniki, zrzut ekranu, komentarz
+> ![alt text](img/3.3.jpg)
+
+```
+Tak jak mozna się spodziewać funkcja anyinteract daje nam w wyniku nie tylko parki zawiejające się w środku obszaru, ale równiez te które jedynie częściowo o ten obszar zahaczają.
+```
 
 ```sql
---  ...
+select pp.name, pp.geom from us_parks pp
+where id IN
+(
+    select p.id
+    from us_parks p, us_states s
+    where s.state = 'Wyoming'
+    and SDO_ANYINTERACT (p.geom, s.geom) = 'TRUE'
+);
 ```
 
 # Zadanie 4
@@ -264,8 +278,51 @@ W przypadku wykorzystywania narzędzia SQL Developer, w celu wizualizacji danych
 
 > Wyniki, zrzut ekranu, komentarz
 
+Obie maski
+
+> ![alt text](img/4.1.jpg)
+
+Maska Inside
+
+> ![alt text](img/4.2.jpg)
+
+Maska CoveredBy
+
+> ![alt text](img/4.3.jpg)
+
+```
+Maski dają nam jako wyniki zbiory rozłączne które dają nam jako sumę ten sam obszar co uzycie ich obu w osobnych zapytaniach. Co jednak dziwne to funkcja coveredby powinna zwracać pełny zbiór zwracany przez INSIDE + dodatkowe elementy dotykające granic obszaru, jednak tak się nie dzieje. Z tego mozna wnioskowac ze funkcja covered by zwraca tylko wyniki dotykające granic z wyłączeniem tych które są wewnątrz ale granic nie dotykają.
+```
+
+Zmodyfikowane zapytania
+
 ```sql
---  ...
+SELECT pp.county, pp.state_abrv, pp.geom from us_counties pp
+where id IN
+(
+    select c.id
+    FROM us_counties c, us_states s
+    WHERE s.state = 'New Hampshire'
+    AND SDO_RELATE ( c.geom,s.geom, 'mask=INSIDE+COVEREDBY') = 'TRUE'
+);
+
+SELECT pp.county, pp.state_abrv, pp.geom from us_counties pp
+where id IN
+(
+    select c.id
+    FROM us_counties c, us_states s
+    WHERE s.state = 'New Hampshire'
+    AND SDO_RELATE ( c.geom,s.geom, 'mask=INSIDE') = 'TRUE'
+);
+
+SELECT pp.county, pp.state_abrv, pp.geom from us_counties pp
+where id IN
+(
+    select c.id
+    FROM us_counties c, us_states s
+    WHERE s.state = 'New Hampshire'
+    AND SDO_RELATE ( c.geom,s.geom, 'mask=COVEREDBY') = 'TRUE'
+);
 ```
 
 # Zadanie 5
