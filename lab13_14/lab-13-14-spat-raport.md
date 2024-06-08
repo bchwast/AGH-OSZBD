@@ -6,7 +6,7 @@
 
 ---
 
-**Imiona i nazwiska:**
+**Imiona i nazwiska: Bartłomiej Chwast, Jakub Domogała**
 
 ---
 
@@ -49,59 +49,78 @@ Zwróć uwagę na formatowanie kodu
 
 Zwizualizuj przykładowe dane
 
+---
+
 US_STATES
 
-> Wyniki, zrzut ekranu, komentarz
-> ![alt text](img/1.1.jpg)
+![alt text](img/1.1.jpg)
 
 ```sql
---  ...
+SELECT * FROM us_states;
 ```
+
+> 50 stanów USA
+
+---
 
 US_INTERSTATES
 
-> Wyniki, zrzut ekranu, komentarz
-> ![alt text](img/1.2.jpg)
+![alt text](img/1.2.jpg)
 
 ```sql
---  ...
+SELECT * FROM us_interstates;
 ```
+
+> Autostrady międzystanowe są skoncentrowane w miejscach o większej gęstości zaludnienia, możemy to zauważyć na mapie, 
+> poprzez gęstszą siatkę w północno-wschodniej części kraju oraz na samym zachodnim wybrzeżu.
+
+---
 
 US_CITIES
 
-> Wyniki, zrzut ekranu, komentarz
-> ![alt text](img/1.3.jpg)
+![alt text](img/1.3.jpg)
 
 ```sql
---  ...
+SELECT * FROM us_cities;
 ```
+
+> Miasta są skoncentrowane wzdłuż wybrzeży, wzdłuż rzek oraz w miejscach o większej gęstości zaludnienia.
+
+---
 
 US_RIVERS
 
-> Wyniki, zrzut ekranu, komentarz
-> ![alt text](img/1.4.jpg)
+![alt text](img/1.4.jpg)
 
 ```sql
---  ...
+SELECT * FROM us_rivers;
 ```
+
+> Więcej rzek znajduje się w północno-wschodniej oraz w środkowej części kraju.
+
+---
 
 US_COUNTIES
 
-> Wyniki, zrzut ekranu, komentarz
-> ![alt text](img/1.5.jpg)
+![alt text](img/1.5.jpg)
 
 ```sql
---  ...
+SELECT * FROM us_counties;
 ```
+
+> Hrabstwa są liczniejsze w miejscach o większej gęstości zaludnienia, widać to na przykład w północno-wschodniej części kraju.
+
+---
 
 US_PARKS
 
-> Wyniki, zrzut ekranu, komentarz
-> ![alt text](img/1.6.jpg)
+![alt text](img/1.6.jpg)
 
 ```sql
---  ...
+SELECT * FROM us_parks;
 ```
+
+> Parki narodowe są skoncentrowane w miejscach o mniejszej gęstości zaludnienia, widać to na przykład w północno-zachodniej części kraju.
 
 # Zadanie 2
 
@@ -112,7 +131,7 @@ Pokaż wynik na mapie.
 prostokąt
 
 ```sql
-SELECT  sdo_geometry (2003, 8307, null,
+SELECT sdo_geometry (2003, 8307, null,
 sdo_elem_info_array (1,1003,3),
 sdo_ordinate_array ( -117.0, 40.0, -90., 44.0)) g
 FROM dual
@@ -120,10 +139,6 @@ FROM dual
 
 > Wyniki, zrzut ekranu, komentarz
 > ![alt text](img/2.0.jpg)
-
-```sql
---  ...
-```
 
 Użyj funkcji SDO_FILTER
 
@@ -140,10 +155,6 @@ Zwróć uwagę na liczbę zwróconych wierszy (16)
 
 > Wyniki, zrzut ekranu, komentarz
 > ![alt text](img/2.1.jpg)
-
-```sql
---  ...
-```
 
 Użyj funkcji SDO_ANYINTERACT
 
@@ -175,10 +186,6 @@ Jest to obliczeniowo o wiele lzejszy proces, ale nie da nam idealnych wynikow.
 Potencjalnie najbardziej optymalnym podejsciem wydaje sie najpierw uzycie funkcji filter(bo jest szybka) na całym zbiorze danych, a następnie funkcji anyinteract na wyniku funkcji filter. To pozwoliłoby nam wykonać najmniej obliczeń przy zachowaniu maksymalnej dokładności wyników.
 ```
 
-```sql
---  ...
-```
-
 # Zadanie 3
 
 Znajdź wszystkie parki (us_parks) których obszary znajdują się wewnątrz stanu Wyoming
@@ -192,25 +199,24 @@ WHERE s.state = 'Wyoming'
 AND SDO_INSIDE (p.geom, s.geom ) = 'TRUE';
 ```
 
+> ![alt text](img/3.0.jpg)
+
 W przypadku wykorzystywania narzędzia SQL Developer, w celu wizualizacji na mapie użyj podzapytania
 
 ```sql
-SELECT pp.name, pp.geom  FROM us_parks pp
+SELECT pp.name, pp.geom FROM us_parks pp
 WHERE id IN
 (
-    SELECT p.id
-    FROM us_parks p, us_states s
-    WHERE s.state = 'Wyoming'
-    and SDO_INSIDE (p.geom, s.geom ) = 'TRUE'
+ SELECT p.id
+ FROM us_parks p, us_states s
+ WHERE s.state = 'Wyoming'
+ and SDO_INSIDE (p.geom, s.geom ) = 'TRUE'
 )
 ```
 
 > Wyniki, zrzut ekranu, komentarz
 > ![alt text](img/3.1.jpg)
 
-```sql
---  ...
-```
 
 ```sql
 SELECT state, geom FROM us_states
@@ -219,10 +225,6 @@ WHERE state = 'Wyoming'
 
 > Wyniki, zrzut ekranu, komentarz
 > ![alt text](img/3.2.jpg)
-
-```sql
---  ...
-```
 
 Porównaj wynik z:
 
@@ -275,8 +277,6 @@ AND SDO_RELATE ( c.geom,s.geom, 'mask=COVEREDBY') = 'TRUE';
 ```
 
 W przypadku wykorzystywania narzędzia SQL Developer, w celu wizualizacji danych na mapie należy użyć podzapytania (podobnie jak w poprzednim zadaniu)
-
-> Wyniki, zrzut ekranu, komentarz
 
 Obie maski
 
@@ -349,25 +349,120 @@ AND sdo_within_distance (c.location, i.geom,'distance=50 unit=mile'
 )
 ```
 
-> Wyniki, zrzut ekranu, komentarz
-
 ```sql
---  ...
+SELECT c.city, c.state_abrv, c.location
+FROM us_cities c
+WHERE ROWID IN
+(
+    SELECT c.rowid
+    FROM us_interstates i, us_cities c
+    WHERE i.interstate = 'I4'
+    AND sdo_within_distance (c.location, i.geom,'distance=50 unit=mile') = 'TRUE'
+);
 ```
+
+![alt text](img/5.0r.jpg)
+![alt text](img/5.0.jpg)
 
 Dodatkowo:
 
-a)     Znajdz wszystkie jednostki administracyjne przez które przechodzi droga I4
+---
+a) Znajdz wszystkie jednostki administracyjne przez które przechodzi droga I4
 
-b)    Znajdz wszystkie jednostki administracyjne w pewnej odległości od I4
+```sql
+SELECT c.county, c.state_abrv, c.geom
+FROM us_counties c
+WHERE ROWID IN
+(
+    SELECT c.rowid
+    FROM us_counties c, us_interstates i
+    WHERE SDO_ANYINTERACT(c.geom, i.geom) = 'TRUE' 
+    AND i.interstate = 'I4'
+);
+```
 
-c)     Znajdz rzeki które przecina droga I4
+![alt text](img/5.1r.jpg)
+![alt text](img/5.1.jpg)
 
-d)    Znajdz wszystkie drogi które przecinają rzekę Mississippi
+---
+b) Znajdz wszystkie jednostki administracyjne w pewnej odległości od I4
 
-e)    Znajdz wszystkie miasta w odlegości od 15 do 30 mil od drogi 'I275'
+```sql
+SELECT c.county, c.state_abrv, c.geom
+FROM us_counties c
+WHERE ROWID IN
+(
+    SELECT c.rowid
+    FROM us_counties c, us_interstates i
+    WHERE SDO_WITHIN_DISTANCE(c.geom, i.geom, 'distance=50 unit=mile') = 'TRUE' 
+    AND i.interstate = 'I4'
+);
+```
 
-f)      Itp. (własne przykłady)
+![alt text](img/5.2r.jpg)
+![alt text](img/5.2.jpg)
+
+---
+c) Znajdz rzeki które przecina droga I4
+
+```sql
+SELECT r.name, r.geom
+FROM us_rivers r
+WHERE ROWID IN
+(
+    SELECT r.rowid
+    FROM us_rivers r, us_interstates i
+    WHERE SDO_ANYINTERACT(r.geom, i.geom) = 'TRUE' 
+    AND i.interstate = 'I4'
+);
+```
+
+![alt text](img/5.3r.jpg)
+![alt text](img/5.3.jpg)
+
+---
+d) Znajdz wszystkie drogi które przecinają rzekę Mississippi
+
+```sql
+SELECT i.interstate, i.geom
+FROM us_interstates i
+WHERE ROWID IN
+(
+    SELECT i.rowid
+    FROM us_rivers r, us_interstates i
+    WHERE SDO_ANYINTERACT(r.geom, i.geom) = 'TRUE' 
+    AND r.name = 'Mississippi'
+)
+```
+
+![alt text](img/5.4r.jpg)
+![alt text](img/5.4.jpg)
+
+---
+e) Znajdz wszystkie miasta w odlegości od 15 do 30 mil od drogi 'I275'
+
+```sql
+SELECT c.city, c.state_abrv, c.location
+FROM us_cities c
+WHERE ROWID IN
+(
+    SELECT c.rowid
+    FROM us_interstates i, us_cities c
+    WHERE i.interstate = 'I275'
+    AND sdo_within_distance (c.location, i.geom,'distance=30 unit=mile') = 'TRUE'
+    MINUS
+    SELECT c.rowid
+    FROM us_interstates i, us_cities c
+    WHERE i.interstate = 'I275'
+    AND sdo_within_distance (c.location, i.geom,'distance=15 unit=mile') = 'TRUE'
+)
+```
+
+![alt text](img/5.5r.jpg)
+![alt text](img/5.5.jpg)
+
+---
+f) Itp. (własne przykłady)
 
 > Wyniki, zrzut ekranu, komentarz
 > (dla każdego z podpunktów)
@@ -390,22 +485,128 @@ AND sdo_nn(c.location, i.geom, 'sdo_num_res=5') = 'TRUE';
 > Wyniki, zrzut ekranu, komentarz
 
 ```sql
---  ...
+SELECT c.city, c.state_abrv, c.location
+FROM us_cities c
+WHERE ROWID IN
+(
+    SELECT c.rowid
+    FROM us_interstates i, us_cities c
+    WHERE i.interstate = 'I4'
+    AND sdo_nn(c.location, i.geom, 'sdo_num_res=5') = 'TRUE'
+)
 ```
+
+![alt text](img/6.0r.jpg)
+![alt text](img/6.0.jpg)
 
 Dodatkowo:
 
-a)     Znajdz kilka miast najbliższych rzece Mississippi
+---
+a) Znajdz kilka miast najbliższych rzece Mississippi
 
-b)    Znajdz 3 miasta najbliżej Nowego Jorku
+```sql
+SELECT c.city, c.state_abrv, c.location
+FROM us_cities c
+WHERE ROWID IN
+(
+    SELECT c.rowid
+    FROM us_rivers r, us_cities c
+    WHERE r.name = 'Mississippi'
+    AND sdo_nn(c.location, r.geom, 'sdo_num_res=5') = 'TRUE'
+)
+```
 
-c)     Znajdz kilka jednostek administracyjnych (us_counties) z których jest najbliżej do Nowego Jorku
+![alt text](img/6.1r.jpg)
+![alt text](img/6.1.jpg)
 
-d)    Znajdz 5 najbliższych miast od drogi  'I170', podaj odległość do tych miast
+---
+b) Znajdz 3 miasta najbliżej Nowego Jorku
 
-e)    Znajdz 5 najbliższych dużych miast (o populacji powyżej 300 tys) od drogi  'I170'
+```sql
+SELECT c.city, c.state_abrv, c.location
+FROM us_cities c
+WHERE ROWID IN
+(
+    SELECT c.rowid
+    FROM us_cities c
+    WHERE c.city != 'New York'
+    AND sdo_nn(c.location, 
+        (SELECT location FROM us_cities WHERE city = 'New York'),
+         'sdo_num_res=4') = 'TRUE'
+)
+```
 
-f)      Itp. (własne przykłady)
+![alt text](img/6.2r.jpg)
+![alt text](img/6.2.jpg)
+
+---
+c) Znajdz kilka jednostek administracyjnych (us_counties) z których jest najbliżej do Nowego Jorku
+
+```sql
+SELECT c.county, c.state_abrv, c.geom
+FROM us_counties c
+WHERE ROWID IN
+(
+    SELECT c.rowid
+    FROM us_counties c, us_cities ci
+    WHERE ci.city = 'New York'
+    AND sdo_nn(c.geom, ci.location, 'sdo_num_res=5') = 'TRUE'
+)
+```
+
+![alt text](img/6.3r.jpg)
+![alt text](img/6.3.jpg)
+
+---
+d) Znajdz 5 najbliższych miast od drogi 'I170', podaj odległość do tych miast
+
+```sql
+SELECT c.city, c.state_abrv, c.location
+FROM us_cities c
+WHERE ROWID IN
+(
+    SELECT c.rowid
+    FROM us_interstates i, us_cities c
+    WHERE i.interstate = 'I170'
+    AND sdo_nn(c.location, i.geom, 'sdo_num_res=5') = 'TRUE'
+)
+```
+```sql
+SELECT c.city, c.state_abrv, c.location, 
+       sdo_geom.sdo_distance(c.location, i.geom, 0.005, 'unit=KM') distance
+FROM us_cities c, us_interstates i
+WHERE i.interstate = 'I170'
+AND sdo_nn(c.location, i.geom, 'sdo_num_res=5') = 'TRUE'
+ORDER BY distance;
+```
+
+![alt text](img/6.4r.jpg)
+![alt text](img/6.4.jpg)
+
+---
+e) Znajdz 5 najbliższych dużych miast (o populacji powyżej 300 tys) od drogi 'I170'
+
+```sql
+SELECT c.city, c.state_abrv, c.location
+FROM us_cities c
+WHERE ROWID IN
+(   
+    SELECT r FROM 
+    (
+        SELECT c.rowid r, c.city, sdo_geom.sdo_distance(c.location, i.geom, 0.005, 'unit=KM') distance
+        FROM us_cities c, us_interstates i
+        WHERE i.interstate = 'I170' AND c.pop90 > 300000
+        ORDER BY distance
+    )
+    WHERE ROWNUM <= 5
+)
+```
+
+![alt text](img/6.5r.jpg)
+![alt text](img/6.5.jpg)
+
+---
+f) Itp. (własne przykłady)
 
 > Wyniki, zrzut ekranu, komentarz
 > (dla każdego z podpunktów)
@@ -424,23 +625,71 @@ FROM us_interstates
 WHERE interstate = 'I4';
 ```
 
-> Wyniki, zrzut ekranu, komentarz
-
-```sql
---  ...
-```
+![alt text](img/7.0.jpg)
 
 Dodatkowo:
 
-a)     Oblicz długość rzeki Mississippi
+---
+a) Oblicz długość rzeki Mississippi
 
-b)    Która droga jest najdłuższa/najkrótsza
+```sql
+SELECT SDO_GEOM.SDO_LENGTH (geom, 0.5,'unit=kilometer') length
+FROM us_rivers
+WHERE name = 'Mississippi';
+```
 
-c)     Która rzeka jest najdłuższa/najkrótsza
+![alt text](img/7.1.jpg)
 
-d)    Które stany mają najdłuższą granicę
+---
+b) Która droga jest najdłuższa/najkrótsza
 
-e)    Itp. (własne przykłady)
+```sql
+SELECT interstate, SDO_GEOM.SDO_LENGTH (geom, 0.5,'unit=kilometer') length
+FROM us_interstates
+ORDER BY length DESC
+FETCH FIRST 1 ROW ONLY;
+
+SELECT interstate, SDO_GEOM.SDO_LENGTH (geom, 0.5,'unit=kilometer') length
+FROM us_interstates
+ORDER BY length
+FETCH FIRST 1 ROW ONLY;
+```
+
+![alt text](img/7.2.1.jpg)
+![alt text](img/7.2.2.jpg)
+
+---
+c) Która rzeka jest najdłuższa/najkrótsza
+
+```sql
+SELECT name, SDO_GEOM.SDO_LENGTH (geom, 0.5,'unit=kilometer') length
+FROM us_rivers
+ORDER BY length DESC
+FETCH FIRST 1 ROW ONLY;
+
+SELECT name, SDO_GEOM.SDO_LENGTH (geom, 0.5,'unit=kilometer') length
+FROM us_rivers
+ORDER BY length
+FETCH FIRST 1 ROW ONLY;
+```
+
+![alt text](img/7.3.1.jpg)
+![alt text](img/7.3.2.jpg)
+
+---
+d) Które stany mają najdłuższą granicę
+
+```sql
+SELECT state, SDO_GEOM.SDO_LENGTH (geom, 0.5,'unit=kilometer') length
+FROM us_states
+ORDER BY length DESC
+FETCH FIRST 5 ROW ONLY;
+```
+
+![alt text](img/7.4.jpg)
+
+---
+e) Itp. (własne przykłady)
 
 > Wyniki, zrzut ekranu, komentarz
 > (dla każdego z podpunktów)
@@ -457,31 +706,66 @@ FROM us_cities c1, us_cities c2
 WHERE c1.city = 'Buffalo' and c2.city = 'Syracuse';
 ```
 
-> Wyniki, zrzut ekranu, komentarz
-
-```sql
---  ...
-```
+![alt text](img/7.5.jpg)
 
 Dodatkowo:
 
-a)     Oblicz odległość między miastem Tampa a drogą I4
+---
+a) Oblicz odległość między miastem Tampa a drogą I4
 
-b)    Jaka jest odległość z między stanem Nowy Jork a  Florydą
+```sql
+SELECT SDO_GEOM.SDO_DISTANCE ( c.location, i.geom, 0.5) distance
+FROM us_cities c, us_interstates i
+WHERE c.city = 'Tampa' and i.interstate = 'I4';
+```
 
-c)     Jaka jest odległość z między miastem Nowy Jork a  Florydą
+![alt text](img/7.6.jpg)
 
-d)    Podaj 3 parki narodowe do których jest najbliżej z Nowego Jorku, oblicz odległości do tych parków
+---
+b) Jaka jest odległość z między stanem Nowy Jork a Florydą
 
-e)    Przetestuj działanie funkcji
+```sql
+SELECT SDO_GEOM.SDO_DISTANCE(s1.geom, s2.geom, 0.5) distance
+FROM us_states s1, us_states s2
+WHERE s1.state = 'New York' AND s2.state = 'Florida';
+```
 
-a.     sdo_intersection, sdo_union, sdo_difference
+![alt text](img/7.7.jpg)
 
-b.     sdo_buffer
+---
+c) Jaka jest odległość z między miastem Nowy Jork a Florydą
 
-c.     sdo_centroid, sdo_mbr, sdo_convexhull, sdo_simplify
+```sql
+SELECT SDO_GEOM.SDO_DISTANCE(s.geom, c.location, 0.5) distance
+FROM us_states s, us_cities c
+WHERE c.city = 'New York' AND s.state = 'Florida';
+```
 
-f)      Itp. (własne przykłady)
+![alt text](img/7.8.jpg)
+
+---
+d) Podaj 3 parki narodowe do których jest najbliżej z Nowego Jorku, oblicz odległości do tych parków
+
+```sql
+SELECT p.name, SDO_GEOM.SDO_DISTANCE(p.geom, c.location, 0.5) distance
+FROM us_parks p, us_cities c
+WHERE c.city = 'New York'
+ORDER BY distance
+FETCH FIRST 3 ROWS ONLY;
+```
+
+![alt text](img/7.9.jpg)
+
+---
+e) Przetestuj działanie funkcji
+
+a. sdo_intersection, sdo_union, sdo_difference
+
+b. sdo_buffer
+
+c. sdo_centroid, sdo_mbr, sdo_convexhull, sdo_simplify
+
+f) Itp. (własne przykłady)
 
 > Wyniki, zrzut ekranu, komentarz
 > (dla każdego z podpunktów)
