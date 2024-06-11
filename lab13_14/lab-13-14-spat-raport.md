@@ -175,15 +175,20 @@ Pokaż wynik na mapie
 > ![alt text](img/2.2.jpg)
 
 ```
-na zółto widzimy wystające części wyniku funkcji filter, zielonawy kolor przedstawia wyniki anyinteract
+na zółto widzimy wystające części wyniku funkcji filter, 
+zielonawy kolor przedstawia wyniki anyinteract
 ```
 
 ```
-funkcja sdo_anyinteract daje lepsze wyniki, funkcja filter znajduje stany które w ogóle nie dotykają naszego prostokąta.
+funkcja sdo_anyinteract daje lepsze wyniki, 
+funkcja filter znajduje stany które w ogóle nie dotykają naszego prostokąta.
 
-Dzieje się tak poniewaz funkcja filter robi filtracje na bazie bounding box'u, a nie dokładnej geometrii obiektów.
+Dzieje się tak poniewaz funkcja filter robi filtracje na bazie bounding box'u, 
+a nie dokładnej geometrii obiektów.
 Jest to obliczeniowo o wiele lzejszy proces, ale nie da nam idealnych wynikow.
-Potencjalnie najbardziej optymalnym podejsciem wydaje sie najpierw uzycie funkcji filter(bo jest szybka) na całym zbiorze danych, a następnie funkcji anyinteract na wyniku funkcji filter. To pozwoliłoby nam wykonać najmniej obliczeń przy zachowaniu maksymalnej dokładności wyników.
+Potencjalnie najbardziej optymalnym podejsciem wydaje sie najpierw uzycie funkcji filter 
+(bo jest szybka) na całym zbiorze danych, a następnie funkcji anyinteract na wyniku funkcji filter. 
+To pozwoliłoby nam wykonać najmniej obliczeń przy zachowaniu maksymalnej dokładności wyników.
 ```
 
 # Zadanie 3
@@ -240,7 +245,8 @@ W celu wizualizacji użyj podzapytania
 > ![alt text](img/3.3.jpg)
 
 ```
-Tak jak mozna się spodziewać funkcja anyinteract daje nam w wyniku nie tylko parki zawiejające się w środku obszaru, ale równiez te które jedynie częściowo o ten obszar zahaczają.
+Tak jak mozna się spodziewać funkcja anyinteract daje nam w wyniku nie tylko parki zawiejające się 
+w środku obszaru, ale równiez te które jedynie częściowo o ten obszar zahaczają.
 ```
 
 ```sql
@@ -290,7 +296,12 @@ Maska CoveredBy
 > ![alt text](img/4.3.jpg)
 
 ```
-Maski dają nam jako wyniki zbiory rozłączne które dają nam jako sumę ten sam obszar co uzycie ich obu w osobnych zapytaniach. Co jednak dziwne to funkcja coveredby powinna zwracać pełny zbiór zwracany przez INSIDE + dodatkowe elementy dotykające granic obszaru, jednak tak się nie dzieje. Z tego mozna wnioskowac ze funkcja covered by zwraca tylko wyniki dotykające granic z wyłączeniem tych które są wewnątrz ale granic nie dotykają.
+Maski dają nam jako wyniki zbiory rozłączne które dają nam jako sumę ten sam obszar, 
+co uzycie ich obu w osobnych zapytaniach. 
+Co jednak dziwne to funkcja coveredby powinna zwracać pełny zbiór zwracany przez 
+INSIDE + dodatkowe elementy dotykające granic obszaru, jednak tak się nie dzieje. 
+Z tego mozna wnioskowac ze funkcja covered by zwraca tylko wyniki dotykające granic 
+z wyłączeniem tych które są wewnątrz ale granic nie dotykają.
 ```
 
 Zmodyfikowane zapytania
@@ -468,10 +479,8 @@ WHERE ROWID IN
 ---
 
 f) Itp. (własne przykłady)
-f) znajdź wszystkie jednostki administracyjne w odległości od 20 do 50 kilometrów od miasta Detroit
 
-> Wyniki, zrzut ekranu, komentarz
-> (dla każdego z podpunktów)
+f) znajdź wszystkie jednostki administracyjne w odległości od 20 do 50 kilometrów od miasta Detroit
 
 ```sql
 SELECT c.county, c.state_abrv, c.geom
@@ -489,7 +498,6 @@ WHERE ROWID IN
     WHERE SDO_WITHIN_DISTANCE(a.geom, b.location, 'distance=20 unit=KM') = 'TRUE'
     AND b.city = 'Detroit'
 )
---  ...
 ```
 
 ![alt text](img/5.6r.jpg)
@@ -638,10 +646,8 @@ WHERE ROWID IN
 ---
 
 f) Itp. (własne przykłady)
-f) Znajdź 5 najblizszych rzek od Denver
 
-> Wyniki, zrzut ekranu, komentarz
-> (dla każdego z podpunktów)
+f) Znajdź 5 najblizszych rzek od Denver
 
 ```sql
 SELECT r.name, r.geom
@@ -654,7 +660,6 @@ WHERE ROWID IN
     AND sdo_nn(r.geom, c.location, 'sdo_num_res=5') = 'TRUE'
 )
 ```
-
 ![alt text](img/6.6r.jpg)
 ![alt text](img/6.6.jpg)
 
